@@ -25,8 +25,9 @@ export interface ColdStart {
   readonly seconds: number;
   /**
    * How long the probe waits for any answer before the upstream counts as
-   * cold. A warm container answers `GET /mcp` from its middleware, with no
-   * database or store behind it, in a few milliseconds over the binding.
+   * cold. A warm container answers a `GET` on the endpoint from its
+   * middleware, with no database or store behind it, in a few milliseconds
+   * over the binding.
    */
   readonly probeTimeoutMs: number;
 }

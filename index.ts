@@ -71,13 +71,7 @@ export function createFront(deps: FrontDeps): Front {
     // container that is starting, so the forwarded call is also the wait.
     const forwarded = fetch(toUpstream(request, target, body));
     const call = body === null ? null : toolCall(body);
-    // A call with no credential at all is the upstream's `401` whenever it
-    // answers; intercepting it would turn that into a `200` with an error
-    // frame while the container is cold. Relayed as it is instead.
-    const credentialed =
-      request.headers.has("authorization") ||
-      request.headers.has("x-auth-token");
-    if (call === null || !credentialed) return relay(await forwarded);
+    if (call === null) return relay(await forwarded);
     const first = await Promise.race([
       forwarded.then(
         () => "answered" as const,

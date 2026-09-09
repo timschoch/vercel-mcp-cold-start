@@ -86,8 +86,9 @@ console.log(COLD_START.probeTimeoutMs); // 500
 3. The upstream's real answer, with the same news prepended as the tool
    result's first text block, for clients that show no notifications.
 
-A call with no credential is relayed as it is, so the upstream's `401` stays the
-answer. Anything that is not a `tools/call` is forwarded and relayed untouched.
+A cold `tools/call` the upstream refuses ends the stream with a JSON-RPC error
+that carries the status and the body. Anything that is not a `tools/call` is
+forwarded and relayed untouched, `initialize` and its auth discovery included.
 
 ## Develop
 

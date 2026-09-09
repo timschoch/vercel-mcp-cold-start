@@ -395,7 +395,10 @@ describe("@timschoch/vercel-mcp-cold-start", () => {
     ]);
   });
 
-  it("relays a call with no credential as it is, so the upstream's 401 is the answer even cold", async () => {
+  // The front knows no credential header. Auth discovery runs on `initialize`
+  // and the SSE `GET`, both relayed untouched; a `tools/call` the upstream
+  // refuses, keyless or expired, ends the cold stream the same way.
+  it("intercepts a keyless cold tools/call too; the upstream's 401 becomes the error frame", async () => {
     let up = false;
     const upstream = fakeUpstream({ up: () => up });
     const front = createFront({
@@ -412,10 +415,21 @@ describe("@timschoch/vercel-mcp-cold-start", () => {
       message("tools/call", { name: "list_brands" }),
       {}
     );
+    const received = [];
+    for await (const frame of frames(res)) received.push(frame);
 
-    expect(res.status).toBe(401);
-    expect(await res.json()).toEqual({ error: { code: "unauthorized" } });
-    expect(upstream.hits).toEqual(["POST /mcp"]);
+    expect(res.status).toBe(200);
+    expect(res.headers.get("content-type")).toBe("text/event-stream");
+    expect(received.at(-1)).toEqual({
+      jsonrpc: "2.0",
+      id: 7,
+      error: {
+        code: -32000,
+        message: "the server answered 401",
+        data: JSON.stringify({ error: { code: "unauthorized" } }),
+      },
+    });
+    expect(upstream.hits).toEqual(["POST /mcp", "GET /mcp"]);
   });
 
   it("turns a refusal on the cold path into a JSON-RPC error, the status line being sent", async () => {
