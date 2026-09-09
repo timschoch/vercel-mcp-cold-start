@@ -16,6 +16,8 @@ import {
 import { relay, toUpstream } from "./lib/forward";
 
 export type { ColdStart } from "./lib/cold-start";
+// The defaults themselves, so a caller can read what it does not override.
+export { COLD_START } from "./lib/cold-start";
 
 export interface FrontDeps {
   /** The upstream's base URL: `UPSTREAM_URL`, from the service binding. */
