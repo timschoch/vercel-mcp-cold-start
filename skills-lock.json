@@ -6,12 +6,6 @@
       "sourceType": "github",
       "skillPath": "bundles/setup-project/skills/setup-project/SKILL.md",
       "computedHash": "ed292fa635b6367a2d5d6fd360537a4dac79a74e2aabbab11f4a3e6e42fe3677"
-    },
-    "setup-repo": {
-      "source": "timschoch/skilly",
-      "sourceType": "github",
-      "skillPath": "bundles/setup-project/skills/setup-repo/SKILL.md",
-      "computedHash": "55d07657c7af7daadeec23ca45123ec1307f470d5de639df808197cecdc7bed2"
     }
   }
 }
