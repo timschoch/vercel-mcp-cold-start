@@ -32,13 +32,14 @@ function without(headers: Headers): Headers {
   return copy;
 }
 
-/** The caller's request, re-addressed to the upstream's `/mcp`. */
+/** The caller's request, re-addressed to the upstream's MCP path. */
 export function toUpstream(
   request: Request,
   upstream: string,
+  path: string,
   body: string | null
 ): Request {
-  const target = new URL("/mcp", upstream);
+  const target = new URL(path, upstream);
   target.search = new URL(request.url).search;
   return new Request(target, {
     method: request.method,
