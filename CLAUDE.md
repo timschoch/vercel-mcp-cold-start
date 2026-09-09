@@ -2,8 +2,13 @@
 
 `@timschoch/vercel-mcp-cold-start`: a Vercel Function in front of an MCP server
 on a scale-to-zero container. It forwards JSON-RPC verbatim. It intercepts only
-a `tools/call` that arrives cold. It has no runtime dependency. Scope, options
-and the cold-call contract live in [README.md](README.md).
+a `tools/call` that arrives cold. It has no runtime dependency.
+
+Source of truth: options are `FrontDeps` in [index.ts](index.ts) and
+`ColdStart` in [lib/cold-start.ts](lib/cold-start.ts), JSDoc per field. The
+cold-call contract is `coldStartStream`'s doc and the `it` titles in
+[tests/front.test.ts](tests/front.test.ts). Scope, and a human summary of
+both, is [README.md](README.md).
 
 ## Commands
 
