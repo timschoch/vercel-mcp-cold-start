@@ -52,6 +52,15 @@ export { default } from "@timschoch/vercel-mcp-cold-start/server";
 | `seconds`        | `7`            | What the first notice promises. Measure yours; don't guess. |
 | `probeTimeoutMs` | `500`          | How long the probe waits for any answer before "cold".      |
 
+`COLD_START` holds these defaults. Import it to read a value you do not
+override:
+
+```ts
+import { COLD_START } from "@timschoch/vercel-mcp-cold-start";
+
+console.log(COLD_START.probeTimeoutMs); // 500
+```
+
 ### What a cold call sees
 
 1. `notifications/message` (level `info`): "acme is starting, about 7 seconds".

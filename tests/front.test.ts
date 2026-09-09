@@ -4,7 +4,7 @@
 // request with no key as the upstream's `401`, and echoes `Mcp-Session-Id`.
 import { Hono } from "hono";
 import { describe, expect, it } from "vitest";
-import { createFront } from "../index";
+import { COLD_START, createFront } from "../index";
 
 const UPSTREAM = "http://upstream.internal";
 const KEY = "sk_test_the_key";
@@ -427,6 +427,16 @@ describe("@timschoch/vercel-mcp-cold-start", () => {
         message: "the server answered 401",
         data: JSON.stringify({ error: { code: "unauthorized" } }),
       },
+    });
+  });
+
+  // The package root is the only surface a consumer sees. `COLD_START` reached
+  // it late, so this holds the export in place as much as the values.
+  it("exports the defaults a caller does not override", () => {
+    expect(COLD_START).toEqual({
+      name: "the server",
+      seconds: 7,
+      probeTimeoutMs: 500,
     });
   });
 });
