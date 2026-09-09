@@ -10,12 +10,14 @@ a `tools/call` that arrives cold. It imports nothing but
 
 ```sh
 npm install
+npm run build       # tsup, entries index.ts and server.ts, to dist/
 npm run typecheck   # tsc --noEmit
 npm test            # vitest run
 npx lint-staged     # what the pre-commit hook runs first
 ```
 
-`.husky/pre-commit` runs all three. A commit that fails one does not land.
+`.husky/pre-commit` runs lint-staged, typecheck and test. A commit that fails
+one does not land. `dist/` is built, never committed.
 
 ## Layout
 
@@ -41,10 +43,20 @@ npx lint-staged     # what the pre-commit hook runs first
   `.claude/skills/` and `.agents/`. Never edit them by hand. Use
   `npx github:timschoch/skilly add|remove|update`.
 
+## Release
+
+Conventional commits on `main` drive
+[release-please](https://github.com/googleapis/release-please). Merging its
+Release PR tags the version and
+[.github/workflows/release.yml](.github/workflows/release.yml) publishes to npm.
+Version lives in three files that must agree: [package.json](package.json),
+[.release-please-manifest.json](.release-please-manifest.json) and the git tag.
+
 ## Open
 
-npm publishing is not wired yet. The `publish-npm-package` skill has the flow.
-The first publish needs a token bootstrap on npmjs.com before OIDC works.
+The package is not on npm yet. Trusted publishing needs the package to exist
+there first, so a human publishes version 0.1.0 once with a granular token. The
+`publish-npm-package` skill holds that flow.
 
 ## Which skill, in which order
 

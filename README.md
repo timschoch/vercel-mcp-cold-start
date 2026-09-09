@@ -67,9 +67,17 @@ answer. Anything that is not a `tools/call` is forwarded and relayed untouched.
 
 ```sh
 npm install
+npm run build       # tsup, to dist/
 npm run typecheck
 npm test
 ```
+
+## Release
+
+Merge to `main`. [release-please](https://github.com/googleapis/release-please)
+reads the conventional commits and opens a Release PR. Merging that PR tags the
+release, and [.github/workflows/release.yml](.github/workflows/release.yml)
+publishes the package to npm.
 
 ## Licence
 
