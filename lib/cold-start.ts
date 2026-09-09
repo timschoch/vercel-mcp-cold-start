@@ -19,21 +19,23 @@ export interface ColdStart {
    */
   readonly name: string;
   /**
-   * What the first notice promises: "about N seconds". Your own last measured
-   * upstream cold start; a constant, so the promise is never a guess.
+   * What the first notice promises: "about N seconds". The default is a
+   * generous ceiling, so a client settles in for a wait and is only ever
+   * surprised early. Set your own measured cold start to promise less.
    */
   readonly seconds: number;
   /**
    * How long the probe waits for any answer before the upstream counts as
-   * cold. A warm container answers `GET /mcp` from its middleware, with no
-   * database or store behind it, in a few milliseconds over the binding.
+   * cold. A warm container answers a `GET` on the endpoint from its
+   * middleware, with no database or store behind it, in a few milliseconds
+   * over the binding.
    */
   readonly probeTimeoutMs: number;
 }
 
 export const COLD_START: ColdStart = {
   name: "the server",
-  seconds: 7,
+  seconds: 30,
   probeTimeoutMs: 500,
 };
 
