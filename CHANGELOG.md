@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.4.0](https://github.com/timschoch/vercel-mcp-cold-start/compare/v0.3.0...v0.4.0) (2026-09-09)
+
+
+### Features
+
+* make the MCP path a setting ([#8](https://github.com/timschoch/vercel-mcp-cold-start/issues/8)) ([721864a](https://github.com/timschoch/vercel-mcp-cold-start/commit/721864ab514e953b6bccaacc94197b85b3b4e3c5))
+
 ## [0.3.0](https://github.com/timschoch/vercel-mcp-cold-start/compare/v0.2.0...v0.3.0) (2026-09-09)
 
 
