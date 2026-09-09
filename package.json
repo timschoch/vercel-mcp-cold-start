@@ -4,16 +4,31 @@
   "description": "A light Vercel Function that sits in front of an MCP server on a scale-to-zero container.",
   "license": "MIT",
   "type": "module",
+  "engines": {
+    "node": ">=22"
+  },
   "repository": {
     "type": "git",
     "url": "git+https://github.com/timschoch/vercel-mcp-cold-start.git"
   },
+  "exports": {
+    ".": "./index.ts",
+    "./server": "./server.ts"
+  },
   "scripts": {
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run",
     "prepare": "husky"
   },
+  "dependencies": {
+    "hono": "^4.10.7"
+  },
   "devDependencies": {
+    "@types/node": "^22.10.0",
     "husky": "^9.1.7",
     "lint-staged": "^17.5.0",
-    "prettier": "^3.9.6"
+    "prettier": "^3.9.6",
+    "typescript": "^5.7.0",
+    "vitest": "^5.0.0"
   }
 }
