@@ -23,13 +23,13 @@ test on every pull request and on `main`.
 
 ## Layout
 
-| Path                                       | What it holds                                        |
-| ------------------------------------------ | ---------------------------------------------------- |
-| [index.ts](index.ts)                       | `createFront`: the Hono app, the probe, the routing. |
-| [server.ts](server.ts)                     | The ready Function. Reads `UPSTREAM_URL`.            |
-| [lib/cold-start.ts](lib/cold-start.ts)     | The one intercepted case: notices, news, the stream. |
-| [lib/forward.ts](lib/forward.ts)           | One hop, nothing changed: headers in and out.        |
-| [tests/front.test.ts](tests/front.test.ts) | The front over a fake upstream. No socket opens.     |
+| Path                                       | What it holds                                                  |
+| ------------------------------------------ | -------------------------------------------------------------- |
+| [index.ts](index.ts)                       | `createFront`: the probe, the hop, the cold case.              |
+| [server.ts](server.ts)                     | The ready Function. Joins `UPSTREAM_URL`, `UPSTREAM_MCP_PATH`. |
+| [lib/cold-start.ts](lib/cold-start.ts)     | The one intercepted case: notices, news, the stream.           |
+| [lib/forward.ts](lib/forward.ts)           | One hop, nothing changed: headers in and out.                  |
+| [tests/front.test.ts](tests/front.test.ts) | The front over a fake upstream. No socket opens.               |
 
 ## Rules
 

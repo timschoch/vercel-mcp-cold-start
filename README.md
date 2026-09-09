@@ -22,10 +22,15 @@ nothing. It earns its keep only when a cold container makes the first
 import { createFront } from "@timschoch/vercel-mcp-cold-start";
 
 export default createFront({
-  upstream: process.env.UPSTREAM_URL!,
+  upstream: "https://acme.internal/api/mcp",
   coldStart: { name: "acme", seconds: 7 },
 });
 ```
+
+The front answers whatever request reaches it and checks no path. The public
+path is the mount's: the rewrite in `vercel.json`, or the folder of the route
+file. Mount it at `/mcp` and point `upstream` at `/api/mcp`, and the two never
+collide.
 
 Or take the ready-made Function, which reads `UPSTREAM_URL` itself and throws
 on the first request when it is unset:
@@ -34,21 +39,19 @@ on the first request when it is unset:
 export { default } from "@timschoch/vercel-mcp-cold-start/server";
 ```
 
-It reads `MCP_PATH` too, for a server that does not sit on `/mcp`.
+It joins `UPSTREAM_URL` with `UPSTREAM_MCP_PATH`, `/mcp` unless set. A service
+binding injects the host; `UPSTREAM_MCP_PATH=/api/mcp` names the endpoint on
+it.
 
 ### Options
 
 `createFront(deps)`:
 
-| Option      | Default        | What it is                                                 |
-| ----------- | -------------- | ---------------------------------------------------------- |
-| `upstream`  | —              | Base URL of the MCP server. Its MCP path receives the hop. |
-| `path`      | `"/mcp"`       | The MCP path, on the front and on the upstream alike.      |
-| `fetch`     | global `fetch` | How the front reaches the upstream.                        |
-| `coldStart` | see below      | Cold-start timings and the name in the notices.            |
-
-Set `path` to `/api/mcp` when the MCP server sits under an API prefix. The
-front then answers `/api/mcp` and sends the hop to the upstream's `/api/mcp`.
+| Option      | Default        | What it is                                            |
+| ----------- | -------------- | ----------------------------------------------------- |
+| `upstream`  | —              | Full URL of the upstream MCP endpoint. Used as given. |
+| `fetch`     | global `fetch` | How the front reaches the upstream.                   |
+| `coldStart` | see below      | Cold-start timings and the name in the notices.       |
 
 `coldStart`:
 
