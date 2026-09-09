@@ -499,7 +499,7 @@ describe("@timschoch/vercel-mcp-cold-start", () => {
   it("exports the defaults a caller does not override", () => {
     expect(COLD_START).toEqual({
       name: "the server",
-      seconds: 7,
+      seconds: 30,
       probeTimeoutMs: 500,
     });
   });

@@ -66,7 +66,7 @@ it.
 | Option           | Default        | What it is                                                  |
 | ---------------- | -------------- | ----------------------------------------------------------- |
 | `name`           | `"the server"` | What the notices call the upstream. A person reads this.    |
-| `seconds`        | `7`            | What the first notice promises. Measure yours; don't guess. |
+| `seconds`        | `30`           | What the first notice promises. A ceiling; set yours lower. |
 | `probeTimeoutMs` | `500`          | How long the probe waits for any answer before "cold".      |
 
 `COLD_START` holds these defaults. Import it to read a value you do not

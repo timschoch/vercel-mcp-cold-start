@@ -19,8 +19,9 @@ export interface ColdStart {
    */
   readonly name: string;
   /**
-   * What the first notice promises: "about N seconds". Your own last measured
-   * upstream cold start; a constant, so the promise is never a guess.
+   * What the first notice promises: "about N seconds". The default is a
+   * generous ceiling, so a client settles in for a wait and is only ever
+   * surprised early. Set your own measured cold start to promise less.
    */
   readonly seconds: number;
   /**
@@ -34,7 +35,7 @@ export interface ColdStart {
 
 export const COLD_START: ColdStart = {
   name: "the server",
-  seconds: 7,
+  seconds: 30,
   probeTimeoutMs: 500,
 };
 
