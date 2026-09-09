@@ -34,15 +34,21 @@ on the first request when it is unset:
 export { default } from "@timschoch/vercel-mcp-cold-start/server";
 ```
 
+It reads `MCP_PATH` too, for a server that does not sit on `/mcp`.
+
 ### Options
 
 `createFront(deps)`:
 
-| Option      | Default        | What it is                                               |
-| ----------- | -------------- | -------------------------------------------------------- |
-| `upstream`  | —              | Base URL of the MCP server. Its `/mcp` receives the hop. |
-| `fetch`     | global `fetch` | How the front reaches the upstream.                      |
-| `coldStart` | see below      | Cold-start timings and the name in the notices.          |
+| Option      | Default        | What it is                                                 |
+| ----------- | -------------- | ---------------------------------------------------------- |
+| `upstream`  | —              | Base URL of the MCP server. Its MCP path receives the hop. |
+| `path`      | `"/mcp"`       | The MCP path, on the front and on the upstream alike.      |
+| `fetch`     | global `fetch` | How the front reaches the upstream.                        |
+| `coldStart` | see below      | Cold-start timings and the name in the notices.            |
+
+Set `path` to `/api/mcp` when the MCP server sits under an API prefix. The
+front then answers `/api/mcp` and sends the hop to the upstream's `/api/mcp`.
 
 `coldStart`:
 

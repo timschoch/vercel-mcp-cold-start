@@ -4,7 +4,7 @@
 // request with no key as the upstream's `401`, and echoes `Mcp-Session-Id`.
 import { Hono } from "hono";
 import { describe, expect, it } from "vitest";
-import { COLD_START, createFront } from "../index";
+import { COLD_START, createFront, MCP_PATH } from "../index";
 
 const UPSTREAM = "http://upstream.internal";
 const KEY = "sk_test_the_key";
@@ -44,6 +44,7 @@ function fakeUpstream(
     up?: () => boolean;
     answer?: "sse" | "json";
     fail?: () => boolean;
+    path?: string;
   } = {}
 ) {
   const hits: string[] = [];
@@ -58,7 +59,7 @@ function fakeUpstream(
     await next();
     answered.push(`${c.req.method} ${c.req.path}`);
   });
-  app.all("/mcp", async (c) => {
+  app.all(options.path ?? "/mcp", async (c) => {
     requests.push(c.req.raw.clone());
     if (c.req.method !== "POST") return c.body(null, 405);
     const key =
@@ -105,10 +106,11 @@ const message = (
 function post(
   front: Hono,
   body: unknown,
-  headers: Record<string, string> = { authorization: `Bearer ${KEY}` }
+  headers: Record<string, string> = { authorization: `Bearer ${KEY}` },
+  path = "/mcp"
 ): Promise<Response> {
   return Promise.resolve(
-    front.request("http://front/mcp", {
+    front.request(`http://front${path}`, {
       method: "POST",
       headers: {
         ...headers,
@@ -430,6 +432,57 @@ describe("@timschoch/vercel-mcp-cold-start", () => {
     });
   });
 
+  it("answers on the configured path and hops to the same path upstream", async () => {
+    const upstream = fakeUpstream({ path: "/api/mcp" });
+    const front = createFront({
+      upstream: UPSTREAM,
+      path: "/api/mcp",
+      fetch: upstream.fetch,
+    });
+
+    const res = await post(
+      front,
+      message("tools/list"),
+      { authorization: `Bearer ${KEY}` },
+      "/api/mcp"
+    );
+
+    expect(res.status).toBe(200);
+    expect(upstream.hits).toEqual(["POST /api/mcp"]);
+    expect(new URL(upstream.requests[0]!.url).href).toBe(`${UPSTREAM}/api/mcp`);
+    // Only the configured path is routed: `/mcp` is no longer the front's.
+    const off = await post(front, message("tools/list"));
+    expect(off.status).toBe(404);
+  });
+
+  it("probes the configured path on a cold tools/call", async () => {
+    let up = false;
+    const upstream = fakeUpstream({ up: () => up, path: "/api/mcp" });
+    const front = createFront({
+      upstream: UPSTREAM,
+      path: "/api/mcp",
+      fetch: upstream.fetch,
+      coldStart: COLD,
+    });
+
+    const res = await post(
+      front,
+      message("tools/call", { name: "render_image" }),
+      { authorization: `Bearer ${KEY}` },
+      "/api/mcp"
+    );
+    const stream = frames(res);
+    expect((await stream.next()).value).toMatchObject({
+      method: "notifications/message",
+    });
+    expect(upstream.hits).toContain("GET /api/mcp");
+
+    up = true;
+    for await (const _frame of stream) {
+      // drain, so the fake upstream has no request left in flight
+    }
+  });
+
   // The package root is the only surface a consumer sees. `COLD_START` reached
   // it late, so this holds the export in place as much as the values.
   it("exports the defaults a caller does not override", () => {
@@ -438,5 +491,6 @@ describe("@timschoch/vercel-mcp-cold-start", () => {
       seconds: 7,
       probeTimeoutMs: 500,
     });
+    expect(MCP_PATH).toBe("/mcp");
   });
 });
