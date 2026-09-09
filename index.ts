@@ -6,7 +6,6 @@
  * is intercepted, `lib/cold-start.ts`: a `tools/call` that arrives while the
  * container is scaled to zero is told so within a second.
  */
-import { Hono } from "hono";
 import {
   COLD_START,
   type ColdStart,
@@ -31,7 +30,13 @@ export interface FrontDeps {
   readonly coldStart?: Partial<ColdStart>;
 }
 
-export function createFront(deps: FrontDeps): Hono {
+/**
+ * The front as a web handler: what a Vercel Function or a Next.js route
+ * file exports under `GET`, `POST` and `DELETE`, or as its default.
+ */
+export type Front = (request: Request) => Promise<Response>;
+
+export function createFront(deps: FrontDeps): Front {
   const { fetch = globalThis.fetch } = deps;
   const target = new URL(deps.upstream);
   const config: ColdStart = { ...COLD_START, ...deps.coldStart };
@@ -58,11 +63,9 @@ export function createFront(deps: FrontDeps): Hono {
         .finally(() => clearTimeout(timer));
     });
 
-  const app = new Hono();
   // Every path: the mount (a rewrite, a route file) already chose what
   // arrives here, and a second vote could only agree or answer 404.
-  app.all("*", async (c) => {
-    const request = c.req.raw;
+  return async (request) => {
     const body = request.method === "POST" ? await request.text() : null;
     // On its way before anything else: the platform holds a request to a
     // container that is starting, so the forwarded call is also the wait.
@@ -84,6 +87,5 @@ export function createFront(deps: FrontDeps): Hono {
     ]);
     if (first !== "cold") return relay(await forwarded);
     return coldStartStream({ call, config, forwarded });
-  });
-  return app;
+  };
 }

@@ -1,7 +1,7 @@
 import { defineConfig } from "tsup";
 
 // Two entries, the two the package exports: the factory and the ready
-// Function. `hono` stays external, so a consumer resolves its own copy.
+// Function. Nothing is bundled in; the package has no runtime dependency.
 export default defineConfig({
   entry: ["index.ts", "server.ts"],
   format: ["esm"],
@@ -9,5 +9,4 @@ export default defineConfig({
   dts: true,
   clean: true,
   sourcemap: true,
-  external: ["hono"],
 });

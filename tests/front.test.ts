@@ -4,7 +4,7 @@
 // request with no key as the upstream's `401`, and echoes `Mcp-Session-Id`.
 import { Hono } from "hono";
 import { describe, expect, it } from "vitest";
-import { COLD_START, createFront } from "../index";
+import { COLD_START, createFront, type Front } from "../index";
 
 const UPSTREAM = "http://upstream.internal";
 const KEY = "sk_test_the_key";
@@ -104,13 +104,13 @@ const message = (
 });
 
 function post(
-  front: Hono,
+  front: Front,
   body: unknown,
   headers: Record<string, string> = { authorization: `Bearer ${KEY}` },
   path = "/mcp"
 ): Promise<Response> {
-  return Promise.resolve(
-    front.request(`http://front${path}`, {
+  return front(
+    new Request(`http://front${path}`, {
       method: "POST",
       headers: {
         ...headers,
@@ -220,10 +220,12 @@ describe("@timschoch/vercel-mcp-cold-start", () => {
     });
 
     for (const method of ["GET", "DELETE"]) {
-      const res = await front.request("http://front/mcp", {
-        method,
-        headers: { authorization: `Bearer ${KEY}` },
-      });
+      const res = await front(
+        new Request("http://front/mcp", {
+          method,
+          headers: { authorization: `Bearer ${KEY}` },
+        })
+      );
       expect(res.status).toBe(405);
     }
     expect(upstream.hits).toEqual(["GET /mcp", "DELETE /mcp"]);

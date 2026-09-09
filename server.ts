@@ -12,4 +12,11 @@ if (upstream === undefined || upstream === "") {
 
 const endpoint = new URL(process.env["UPSTREAM_MCP_PATH"] || "/mcp", upstream);
 
-export default createFront({ upstream: endpoint.href });
+const front = createFront({ upstream: endpoint.href });
+
+// The named methods are what a Vercel Function and a Next.js route file
+// take; the default is for a bare `api/*.ts` that exports one handler.
+export default front;
+export const GET = front;
+export const POST = front;
+export const DELETE = front;

@@ -2,9 +2,8 @@
 
 `@timschoch/vercel-mcp-cold-start`: a Vercel Function in front of an MCP server
 on a scale-to-zero container. It forwards JSON-RPC verbatim. It intercepts only
-a `tools/call` that arrives cold. It imports nothing but
-[hono](https://hono.dev). Scope, options and the cold-call contract live in
-[README.md](README.md).
+a `tools/call` that arrives cold. It has no runtime dependency. Scope, options
+and the cold-call contract live in [README.md](README.md).
 
 ## Commands
 
@@ -34,8 +33,8 @@ test on every pull request and on `main`.
 ## Rules
 
 - The package knows no tool. A change that names one tool is wrong here.
-- `hono` stays the only runtime dependency. A second one needs a reason in the
-  PR body.
+- No runtime dependency. `hono` is a devDependency for the test fake only. A
+  first runtime one needs a reason in the PR body.
 - No name of a consuming product in this repo. The notices take
   `coldStart.name`.
 - Conventional commits, enforced by `.husky/commit-msg`.
