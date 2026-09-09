@@ -18,6 +18,8 @@ npx lint-staged     # what the pre-commit hook runs first
 
 `.husky/pre-commit` runs lint-staged, typecheck and test. A commit that fails
 one does not land. `dist/` is built, never committed.
+[.github/workflows/ci.yml](.github/workflows/ci.yml) runs build, typecheck and
+test on every pull request and on `main`.
 
 ## Layout
 
