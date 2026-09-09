@@ -1,0 +1,6 @@
+# skilly-owned files
+.skilly.json
+skills-lock.json
+.claude/rules/**
+.claude/skills/**
+.agents/**

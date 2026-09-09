@@ -1,0 +1,8 @@
+{
+  "bundles": [
+    "workflow",
+    "tech-typescript",
+    "tech-vercel",
+    "npmjs"
+  ]
+}
