@@ -1,10 +1,10 @@
 # CLAUDE.md
 
 `@timschoch/vercel-mcp-cold-start`: a Vercel Function in front of an MCP server
-on a scale-to-zero container. It forwards JSON-RPC verbatim. It intercepts only
-a `tools/call` that arrives cold. It imports nothing but
-[hono](https://hono.dev). Scope, options and the cold-call contract live in
-[README.md](README.md).
+on a scale-to-zero container. It forwards JSON-RPC verbatim. It speaks up on
+any request the upstream has not answered in half a second. It imports nothing
+but [hono](https://hono.dev). Scope, options and the slow-request contract live
+in [README.md](README.md).
 
 ## Commands
 
@@ -23,13 +23,13 @@ test on every pull request and on `main`.
 
 ## Layout
 
-| Path                                       | What it holds                                        |
-| ------------------------------------------ | ---------------------------------------------------- |
-| [index.ts](index.ts)                       | `createFront`: the Hono app, the probe, the routing. |
-| [server.ts](server.ts)                     | The ready Function. Reads `UPSTREAM_URL`.            |
-| [lib/cold-start.ts](lib/cold-start.ts)     | The one intercepted case: notices, news, the stream. |
-| [lib/forward.ts](lib/forward.ts)           | One hop, nothing changed: headers in and out.        |
-| [tests/front.test.ts](tests/front.test.ts) | The front over a fake upstream. No socket opens.     |
+| Path                                       | What it holds                                         |
+| ------------------------------------------ | ----------------------------------------------------- |
+| [index.ts](index.ts)                       | `createFront`: the Hono app, the race, the routing.   |
+| [server.ts](server.ts)                     | The ready Function. Reads `UPSTREAM_URL`.             |
+| [lib/notices.ts](lib/notices.ts)           | The slow request: the notice, its repeat, the stream. |
+| [lib/forward.ts](lib/forward.ts)           | One hop, nothing changed: headers in and out.         |
+| [tests/front.test.ts](tests/front.test.ts) | The front over a fake upstream. No socket opens.      |
 
 ## Rules
 
@@ -37,7 +37,7 @@ test on every pull request and on `main`.
 - `hono` stays the only runtime dependency. A second one needs a reason in the
   PR body.
 - No name of a consuming product in this repo. The notices take
-  `coldStart.name`.
+  `notices.name`.
 - Conventional commits, enforced by `.husky/commit-msg`.
 - No direct push to `main`. `.husky/pre-push` refuses it. Work on a branch and
   open a PR.
