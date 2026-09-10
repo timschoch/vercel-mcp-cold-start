@@ -1,5 +1,16 @@
 # Changelog
 
+## [0.6.0](https://github.com/timschoch/vercel-mcp-cold-start/compare/v0.5.0...v0.6.0) (2026-09-10)
+
+
+### ⚠ BREAKING CHANGES
+
+* `coldStart` is now `notices` with `name`, `firstNoticeMs` and `repeatNoticeMs`; `seconds` and `probeTimeoutMs` are gone. `COLD_START` and `ColdStart` are now `NOTICES` and `Notices`.
+
+### Features
+
+* notify on every slow request, drop the cold probe ([#12](https://github.com/timschoch/vercel-mcp-cold-start/issues/12)) ([49864ce](https://github.com/timschoch/vercel-mcp-cold-start/commit/49864cecfe695f2e5e309e61e4c60b0db1a31c15))
+
 ## [0.5.0](https://github.com/timschoch/vercel-mcp-cold-start/compare/v0.4.0...v0.5.0) (2026-09-09)
 
 

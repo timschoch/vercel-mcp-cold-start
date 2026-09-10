@@ -1,6 +1,6 @@
 {
   "name": "@timschoch/vercel-mcp-cold-start",
-  "version": "0.5.0",
+  "version": "0.6.0",
   "description": "A light Vercel Function that sits in front of an MCP server on a scale-to-zero container.",
   "license": "MIT",
   "type": "module",
