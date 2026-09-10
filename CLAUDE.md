@@ -2,9 +2,14 @@
 
 `@timschoch/vercel-mcp-cold-start`: a Vercel Function in front of an MCP server
 on a scale-to-zero container. It forwards JSON-RPC verbatim. It speaks up on
-any request the upstream has not answered in half a second. It imports nothing
-but [hono](https://hono.dev). Scope, options and the slow-request contract live
-in [README.md](README.md).
+any request the upstream has not answered in half a second. It has no runtime
+dependency.
+
+Source of truth: options are `FrontDeps` in [index.ts](index.ts) and
+`Notices` in [lib/notices.ts](lib/notices.ts), JSDoc per field. The
+slow-request contract is `noticeStream`'s doc and the `it` titles in
+[tests/front.test.ts](tests/front.test.ts). Scope, and a human summary of
+both, is [README.md](README.md).
 
 ## Commands
 
@@ -23,19 +28,19 @@ test on every pull request and on `main`.
 
 ## Layout
 
-| Path                                       | What it holds                                         |
-| ------------------------------------------ | ----------------------------------------------------- |
-| [index.ts](index.ts)                       | `createFront`: the Hono app, the race, the routing.   |
-| [server.ts](server.ts)                     | The ready Function. Reads `UPSTREAM_URL`.             |
-| [lib/notices.ts](lib/notices.ts)           | The slow request: the notice, its repeat, the stream. |
-| [lib/forward.ts](lib/forward.ts)           | One hop, nothing changed: headers in and out.         |
-| [tests/front.test.ts](tests/front.test.ts) | The front over a fake upstream. No socket opens.      |
+| Path                                       | What it holds                                                  |
+| ------------------------------------------ | -------------------------------------------------------------- |
+| [index.ts](index.ts)                       | `createFront`: the hop, the race, the slow case.               |
+| [server.ts](server.ts)                     | The ready Function. Joins `UPSTREAM_URL`, `UPSTREAM_MCP_PATH`. |
+| [lib/notices.ts](lib/notices.ts)           | The slow request: the notice, its repeat, the stream.          |
+| [lib/forward.ts](lib/forward.ts)           | One hop, nothing changed: headers in and out.                  |
+| [tests/front.test.ts](tests/front.test.ts) | The front over a fake upstream. No socket opens.               |
 
 ## Rules
 
 - The package knows no tool. A change that names one tool is wrong here.
-- `hono` stays the only runtime dependency. A second one needs a reason in the
-  PR body.
+- No runtime dependency. `hono` is a devDependency for the test fake only. A
+  first runtime one needs a reason in the PR body.
 - No name of a consuming product in this repo. The notices take
   `notices.name`.
 - Conventional commits, enforced by `.husky/commit-msg`.

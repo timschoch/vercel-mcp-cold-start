@@ -4,7 +4,7 @@
 // request with no key as the upstream's `401`, and echoes `Mcp-Session-Id`.
 import { Hono } from "hono";
 import { describe, expect, it } from "vitest";
-import { NOTICES, createFront } from "../index";
+import { NOTICES, createFront, type Front } from "../index";
 
 const UPSTREAM = "http://upstream.internal";
 const KEY = "sk_test_the_key";
@@ -32,14 +32,16 @@ const NOTICE = {
  * The fake upstream. `up` says whether the container is listening right now;
  * while it is not, every request is held the way the platform holds one to
  * a container that is starting, and answered once it is. `hits` records
- * arrivals, `answered` completions. `fail` makes a POST reject after the hold,
- * as a connection the platform dropped would.
+ * arrivals, `answered` completions, `signals` the abort signal of each hop.
+ * `fail` makes a POST reject after the hold, as a connection the platform
+ * dropped would.
  */
 function fakeUpstream(
   options: {
     up?: () => boolean;
     answer?: "sse" | "json";
     fail?: () => boolean;
+    path?: string;
   } = {}
 ) {
   const hits: string[] = [];
@@ -55,7 +57,7 @@ function fakeUpstream(
     await next();
     answered.push(`${c.req.method} ${c.req.path}`);
   });
-  app.all("/mcp", async (c) => {
+  app.all(options.path ?? "/mcp", async (c) => {
     requests.push(c.req.raw.clone());
     if (c.req.method !== "POST") return c.body(null, 405);
     const key =
@@ -103,14 +105,15 @@ const message = (
 });
 
 function post(
-  front: Hono,
+  front: Front,
   body: unknown,
   headers: Record<string, string> = { authorization: `Bearer ${KEY}` },
-  init: RequestInit = {}
+  init: RequestInit & { path?: string } = {}
 ): Promise<Response> {
-  return Promise.resolve(
-    front.request("http://front/mcp", {
-      ...init,
+  const { path = "/mcp", ...rest } = init;
+  return front(
+    new Request(`http://front${path}`, {
+      ...rest,
       method: "POST",
       headers: {
         ...headers,
@@ -150,15 +153,19 @@ async function* frames(response: Response): AsyncGenerator<unknown> {
 const FAST = { firstNoticeMs: 20, repeatNoticeMs: 30 };
 
 /** A front over an upstream that is down until `up()` is called. */
-function slowFront(options: { answer?: "sse" | "json"; fail?: boolean } = {}) {
+function slowFront(
+  options: { answer?: "sse" | "json"; fail?: boolean; path?: string } = {}
+) {
   let ready = false;
+  const path = options.path ?? "/mcp";
   const upstream = fakeUpstream({
     up: () => ready,
+    path,
     ...(options.answer === undefined ? {} : { answer: options.answer }),
     ...(options.fail === undefined ? {} : { fail: () => options.fail! }),
   });
   const front = createFront({
-    upstream: UPSTREAM,
+    upstream: `${UPSTREAM}${path}`,
     fetch: upstream.fetch,
     notices: FAST,
   });
@@ -174,7 +181,10 @@ function slowFront(options: { answer?: "sse" | "json"; fail?: boolean } = {}) {
 describe("@timschoch/vercel-mcp-cold-start", () => {
   it("forwards a message verbatim and relays the answer as it came", async () => {
     const upstream = fakeUpstream();
-    const front = createFront({ upstream: UPSTREAM, fetch: upstream.fetch });
+    const front = createFront({
+      upstream: `${UPSTREAM}/mcp`,
+      fetch: upstream.fetch,
+    });
     const body = message("tools/list");
 
     const res = await post(front, body);
@@ -197,7 +207,10 @@ describe("@timschoch/vercel-mcp-cold-start", () => {
 
   it("carries x-auth-token too, and a request with no key is the upstream's 401", async () => {
     const upstream = fakeUpstream();
-    const front = createFront({ upstream: UPSTREAM, fetch: upstream.fetch });
+    const front = createFront({
+      upstream: `${UPSTREAM}/mcp`,
+      fetch: upstream.fetch,
+    });
 
     const token = await post(front, message("initialize"), {
       "x-auth-token": KEY,
@@ -212,7 +225,10 @@ describe("@timschoch/vercel-mcp-cold-start", () => {
 
   it("carries Mcp-Session-Id both ways", async () => {
     const upstream = fakeUpstream();
-    const front = createFront({ upstream: UPSTREAM, fetch: upstream.fetch });
+    const front = createFront({
+      upstream: `${UPSTREAM}/mcp`,
+      fetch: upstream.fetch,
+    });
 
     const res = await post(front, message("tools/list"), {
       authorization: `Bearer ${KEY}`,
@@ -227,13 +243,18 @@ describe("@timschoch/vercel-mcp-cold-start", () => {
 
   it("forwards GET and DELETE untouched, so the upstream's 405 is the answer", async () => {
     const upstream = fakeUpstream();
-    const front = createFront({ upstream: UPSTREAM, fetch: upstream.fetch });
+    const front = createFront({
+      upstream: `${UPSTREAM}/mcp`,
+      fetch: upstream.fetch,
+    });
 
     for (const method of ["GET", "DELETE"]) {
-      const res = await front.request("http://front/mcp", {
-        method,
-        headers: { authorization: `Bearer ${KEY}` },
-      });
+      const res = await front(
+        new Request("http://front/mcp", {
+          method,
+          headers: { authorization: `Bearer ${KEY}` },
+        })
+      );
       expect(res.status).toBe(405);
     }
     expect(upstream.hits).toEqual(["GET /mcp", "DELETE /mcp"]);
@@ -241,7 +262,10 @@ describe("@timschoch/vercel-mcp-cold-start", () => {
 
   it("hands the caller's signal to the hop, so a client that hangs up takes it down", async () => {
     const upstream = fakeUpstream();
-    const front = createFront({ upstream: UPSTREAM, fetch: upstream.fetch });
+    const front = createFront({
+      upstream: `${UPSTREAM}/mcp`,
+      fetch: upstream.fetch,
+    });
     const controller = new AbortController();
 
     await post(front, message("tools/list"), undefined, {
@@ -376,18 +400,20 @@ describe("@timschoch/vercel-mcp-cold-start", () => {
     });
   });
 
+  // The front knows no credential header. Auth discovery runs on `initialize`
+  // and the SSE `GET`; a slow request the upstream refuses, keyless or
+  // expired, ends the stream the same way.
   it("turns a slow refusal into a JSON-RPC error, the status line being sent", async () => {
-    const { front, up } = slowFront();
+    const { upstream, front, up } = slowFront();
 
-    const res = await post(front, message("tools/list"), {
-      "x-auth-token": "not-the-key",
-    });
+    const res = await post(front, message("tools/call", { name: "x" }), {});
     const stream = frames(res);
     await stream.next();
     up();
     const rest = [];
     for await (const frame of stream) rest.push(frame);
 
+    expect(res.status).toBe(200);
     expect(rest.at(-1)).toEqual({
       jsonrpc: "2.0",
       id: 7,
@@ -397,6 +423,26 @@ describe("@timschoch/vercel-mcp-cold-start", () => {
         data: JSON.stringify({ error: { code: "unauthorized" } }),
       },
     });
+    expect(upstream.hits).toEqual(["POST /mcp"]);
+  });
+
+  it("answers any path and sends the hop to the upstream endpoint as given", async () => {
+    const { upstream, front, up } = slowFront({ path: "/api/mcp" });
+
+    // The mount chose the public path; the front does not check it.
+    const res = await post(front, message("tools/call"), undefined, {
+      path: "/anything",
+    });
+    const stream = frames(res);
+    expect((await stream.next()).value).toEqual(NOTICE);
+    // The hop reaches the endpoint, nothing joined onto it.
+    expect(upstream.hits).toEqual(["POST /api/mcp"]);
+
+    up();
+    const rest = [];
+    for await (const frame of stream) rest.push(frame);
+    expect(rest.at(-1)).toEqual(answerTo(7, "tools/call"));
+    expect(new URL(upstream.requests[0]!.url).href).toBe(`${UPSTREAM}/api/mcp`);
   });
 
   // The package root is the only surface a consumer sees. This holds the

@@ -1,6 +1,6 @@
 {
   "name": "@timschoch/vercel-mcp-cold-start",
-  "version": "0.3.0",
+  "version": "0.5.0",
   "description": "A light Vercel Function that sits in front of an MCP server on a scale-to-zero container.",
   "license": "MIT",
   "type": "module",
@@ -15,7 +15,6 @@
     "mcp",
     "vercel",
     "cold-start",
-    "hono",
     "json-rpc"
   ],
   "exports": {
@@ -40,11 +39,9 @@
     "test": "vitest run",
     "prepare": "husky"
   },
-  "dependencies": {
-    "hono": "^4.10.7"
-  },
   "devDependencies": {
     "@types/node": "^22.10.0",
+    "hono": "^4.10.7",
     "husky": "^9.1.7",
     "lint-staged": "^17.5.0",
     "prettier": "^3.9.6",

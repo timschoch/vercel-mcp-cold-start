@@ -9,7 +9,7 @@ on its own stream, saying the request is being processed. The notice repeats
 every two seconds until the answer arrives, and the answer is relayed as it
 came.
 
-It knows no tool and imports nothing but [hono](https://hono.dev).
+It knows no tool and has no runtime dependency.
 
 ## Only useful when the upstream scales to zero
 
@@ -25,30 +25,47 @@ upstream fast first.
 ## Use it
 
 ```ts
+// app/mcp/route.ts
 import { createFront } from "@timschoch/vercel-mcp-cold-start";
 
-export default createFront({
-  upstream: process.env.UPSTREAM_URL!,
+const front = createFront({
+  upstream: "https://acme.internal/api/mcp",
   notices: { name: "acme" },
 });
+
+export { front as GET, front as POST, front as DELETE };
 ```
+
+`createFront` returns a web handler, `(request: Request) => Promise<Response>`.
+A Next.js route file and a Vercel Function both take it under the method
+names; a bare `api/mcp.ts` may export it as the default.
+
+The front answers whatever request reaches it and checks no path. The public
+path is the mount's: the rewrite in `vercel.json`, or the folder of the route
+file. Mount it at `/mcp` and point `upstream` at `/api/mcp`, and the two never
+collide.
 
 Or take the ready-made Function, which reads `UPSTREAM_URL` itself and throws
 on the first request when it is unset:
 
 ```ts
-export { default } from "@timschoch/vercel-mcp-cold-start/server";
+// app/mcp/route.ts
+export { GET, POST, DELETE } from "@timschoch/vercel-mcp-cold-start/server";
 ```
+
+It joins `UPSTREAM_URL` with `UPSTREAM_MCP_PATH`, `/mcp` unless set. A service
+binding injects the host; `UPSTREAM_MCP_PATH=/api/mcp` names the endpoint on
+it.
 
 ### Options
 
 `createFront(deps)`:
 
-| Option     | Default        | What it is                                               |
-| ---------- | -------------- | -------------------------------------------------------- |
-| `upstream` | —              | Base URL of the MCP server. Its `/mcp` receives the hop. |
-| `fetch`    | global `fetch` | How the front reaches the upstream.                      |
-| `notices`  | see below      | Notice timings and the name in the notices.              |
+| Option     | Default        | What it is                                            |
+| ---------- | -------------- | ----------------------------------------------------- |
+| `upstream` | —              | Full URL of the upstream MCP endpoint. Used as given. |
+| `fetch`    | global `fetch` | How the front reaches the upstream.                   |
+| `notices`  | see below      | Notice timings and the name in the notices.           |
 
 `notices`:
 
