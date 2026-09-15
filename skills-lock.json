@@ -19,6 +19,12 @@
       "skillPath": "skills/engineering/ask-matt/SKILL.md",
       "computedHash": "f9018507a53d76c325ee1af0e11be82c4df3fb071f1e881485196a7c733edb7c"
     },
+    "audit-agent-history": {
+      "source": "timschoch/skilly",
+      "sourceType": "github",
+      "skillPath": "bundles/workflow/skills/audit-agent-history/SKILL.md",
+      "computedHash": "19cc423573fecc622f3e71958efccf612abc4800e21de2c8d248a44828d999a9"
+    },
     "blast-radius": {
       "source": "cursor/plugins",
       "sourceType": "github",
@@ -114,6 +120,12 @@
       "sourceType": "github",
       "skillPath": "cursor-team-kit/skills/make-pr-easy-to-review/SKILL.md",
       "computedHash": "8b3e62ce5609388731966d66725a0962e6d6c249bf384b84e131eb24de3c2b27"
+    },
+    "naming": {
+      "source": "timschoch/skilly",
+      "sourceType": "github",
+      "skillPath": "bundles/workflow/skills/naming/SKILL.md",
+      "computedHash": "4bfbe10451af13b3e783ea06ff8c718e3e7cd54b7b6a160526079076b865317e"
     },
     "orchestrate": {
       "source": "timschoch/skilly",
