@@ -77,7 +77,7 @@
       "source": "timschoch/skilly",
       "sourceType": "github",
       "skillPath": "bundles/workflow/skills/git-shortcuts/SKILL.md",
-      "computedHash": "3b61270f9b5ce7f73ad4b3f314ec1f434a3df1f3cfc02ca560980e446cbac77a"
+      "computedHash": "cb85389e6457af1faeebdee1a111c138f4cd1c022579eaf71f033f12768bf6e1"
     },
     "grilling": {
       "source": "timschoch/mattpocock-skills",
