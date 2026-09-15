@@ -38,6 +38,9 @@ Sonnet 5 / Opus 5 / Fable 5 vs Haiku 4.5 (newer tokenizer).
    invalidates the prompt cache. Vary effort across agents, never within one.
 5. **Fable can refuse.** Its safety classifiers return `stop_reason: "refusal"`
    as HTTP 200. Name a fallback model for any unattended Fable job.
+6. **Match ceremony to the task.** No subagents and no multi-agent panel for
+   work one agent finishes in one pass. Delegation is for breadth or for
+   adversarial review, not for ordinary tasks.
 
 ## Frontmatter
 

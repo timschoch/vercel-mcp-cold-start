@@ -55,10 +55,28 @@ A wrong base produces a *smaller* diff, and a small diff is what a review report
 | ------ | ---------------------------------------------------------------------------------------------------------------------------------- |
 | `c`    | Commit — invoke the `/commit` skill (stage relevant files, write a conventional commit message, create the commit)                 |
 | `p`    | Push — `git push origin <current-branch>`                                                                                          |
-| `pr`   | Create PR — `gh pr create` following the PR creation protocol (title + body, `--base "$base"`)                                     |
+| `pr`   | Create PR — `gh pr create` following [PR creation protocol](#pr-creation-protocol) (title + body, `--base "$base"`)                |
 | `m`    | Merge — `gh pr merge --squash`, **except** an `epic/*` branch merging into the trunk, which uses `gh pr merge --merge`. Nothing more — do NOT add `--delete-branch`. Then offer a Slack summary (see below) |
 
 Squash is right for a ticket branch: it dies after merge. An epic merges with a merge commit — squashing would collapse the per-ticket commits that were the reason to open an epic, and release-please reads those commit messages to build the changelog.
+
+## PR creation protocol
+
+**Preflight.** `gh pr view --json url`. A PR already open for this branch → report it and stop. Then read the diff against `origin/$base` and confirm it matches the goal the user gave.
+
+**Title.** Conventional-commit type, then why the change matters, not what was done.
+
+- Bad: `perf(server): negotiate per-message deflate on the websocket`
+- Good: `perf(server): cut websocket frame size by 70% with gzipping`
+
+**Body.** Open with the problem in the user's own words, then the solution in a few lines. Never an implementation inventory.
+
+- Bad: "Removed implicit workspace carryover from every new thread entry point …"
+- Good: "My new worktree default was ignored when starting new threads on existing worktrees."
+
+Diff over ~200 lines → add a short "How to review" pointer naming where to start. End the body with the attribution lines the session provides.
+
+**Never a draft PR.** Review bots only run on a real one.
 
 ## Rules
 
