@@ -25,6 +25,18 @@
       "skillPath": "bundles/workflow/skills/audit-agent-history/SKILL.md",
       "computedHash": "19cc423573fecc622f3e71958efccf612abc4800e21de2c8d248a44828d999a9"
     },
+    "audit-skilly-workflow": {
+      "source": "timschoch/skilly",
+      "sourceType": "github",
+      "skillPath": "bundles/workflow/skills/audit-skilly-workflow/SKILL.md",
+      "computedHash": "f1ff96eb7d865377973b61178e0a57b2a3b3a7c0a25b1df528f30347a7acc993"
+    },
+    "babysit-pr": {
+      "source": "timschoch/skilly",
+      "sourceType": "github",
+      "skillPath": "bundles/workflow/skills/babysit-pr/SKILL.md",
+      "computedHash": "b6c7ceacc0295041878b716141e5bd94f999c001371a40728cb0f854247889ac"
+    },
     "blast-radius": {
       "source": "cursor/plugins",
       "sourceType": "github",
@@ -282,6 +294,12 @@
       "sourceType": "github",
       "skillPath": "bundles/tech-vercel/skills/vercel-cli/SKILL.md",
       "computedHash": "b97286d8282717cf4c0c9e363c1f2b3bc09b3fd9bb7871127b1c450b05e7f422"
+    },
+    "verify": {
+      "source": "timschoch/skilly",
+      "sourceType": "github",
+      "skillPath": "bundles/workflow/skills/verify/SKILL.md",
+      "computedHash": "dbce3d68c601de32b0f98be07d8314553a539bd968d44d777b802a112330ea9e"
     },
     "wait-what": {
       "source": "timschoch/mattpocock-skills",
