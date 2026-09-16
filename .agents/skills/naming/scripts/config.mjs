@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 // The naming config: defaults from `../references/naming.json`, overridden by
-// `docs/agents/naming.json` in the consumer repo. The naming skill and the
+// `.skilly/naming.json` in the consumer repo. The naming skill and the
 // naming gate both read every word list from here, so a consumer changes a
 // rule once, in one file.
 //
@@ -12,7 +12,9 @@ import { dirname, join } from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
 
 const DEFAULTS_PATH = join(dirname(fileURLToPath(import.meta.url)), '..', 'references', 'naming.json');
-const DEFAULT_OVERRIDE_PATH = 'docs/agents/naming.json';
+const DEFAULT_OVERRIDE_PATH = join('.skilly', 'naming.json');
+// Consumers set up before the .skilly/ move still keep their overrides here.
+const LEGACY_OVERRIDE_PATH = join('docs', 'agents', 'naming.json');
 const COMMENT_KEY = '$comment';
 
 const isPlainObject = (value) => typeof value === 'object' && value !== null && !Array.isArray(value);
@@ -81,8 +83,9 @@ function parseJsonFile(path) {
 // The merged config for one repo root. A missing override is the normal case.
 export function loadNamingConfig(root = process.cwd(), { overridePath = DEFAULT_OVERRIDE_PATH } = {}) {
   const defaults = parseJsonFile(DEFAULTS_PATH);
-  const overrideFile = join(root, overridePath);
-  if (!existsSync(overrideFile)) return mergeNamingConfig(defaults, {});
+  const candidates = overridePath === DEFAULT_OVERRIDE_PATH ? [overridePath, LEGACY_OVERRIDE_PATH] : [overridePath];
+  const overrideFile = candidates.map((path) => join(root, path)).find(existsSync);
+  if (!overrideFile) return mergeNamingConfig(defaults, {});
   const override = parseJsonFile(overrideFile);
   if (!isPlainObject(override)) throw new Error(`${overrideFile} is not valid JSON: expected an object`);
   return mergeNamingConfig(defaults, override);

@@ -1,8 +1,12 @@
 {
+  "tier": "sandbox",
   "bundles": [
     "workflow",
     "tech-typescript",
     "tech-vercel",
     "npmjs"
-  ]
+  ],
+  "review": {
+    "bots": []
+  }
 }

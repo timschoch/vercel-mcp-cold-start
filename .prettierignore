@@ -4,3 +4,6 @@ skills-lock.json
 .claude/rules
 .claude/skills
 .agents
+
+# skilly-owned files
+.skilly

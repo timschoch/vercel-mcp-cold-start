@@ -18,7 +18,7 @@ Applies every time an agent spawns a subagent or teammate. Set `model` and
 | Bulk workers under an orchestrator | `sonnet` | `low` |
 | Single-fact code or web lookup, classification | `haiku` | omit — no effort support |
 
-Relative token cost: Haiku 1x · Sonnet 2x · Opus 5x · Fable 10x.
+Relative token cost (August 2026): Haiku 1x · Sonnet 2x · Opus 5x · Fable 10x.
 Same multiplier for input, output and cache. Add ~30% token inflation for
 Sonnet 5 / Opus 5 / Fable 5 vs Haiku 4.5 (newer tokenizer).
 
@@ -38,9 +38,13 @@ Sonnet 5 / Opus 5 / Fable 5 vs Haiku 4.5 (newer tokenizer).
    invalidates the prompt cache. Vary effort across agents, never within one.
 5. **Fable can refuse.** Its safety classifiers return `stop_reason: "refusal"`
    as HTTP 200. Name a fallback model for any unattended Fable job.
-6. **Match ceremony to the task.** No subagents and no multi-agent panel for
-   work one agent finishes in one pass. Delegation is for breadth or for
-   adversarial review, not for ordinary tasks.
+6. **Delegate only for breadth, parallelism, or review.** Work one agent
+   finishes in one pass → do it yourself. Spawn a subagent only when:
+   - the task needs heavy reading (research, broad search, many files),
+   - the parts are independent and can run at the same time, or
+   - you want a second review free of your own bias.
+
+   Bring back the conclusion, not the raw payload.
 
 ## Frontmatter
 

@@ -111,7 +111,7 @@ Before you name anything, run `node .agents/skills/naming/scripts/config.mjs` an
 
 ## Per-project overrides
 
-Override file: `docs/agents/naming.json`, same shape as [references/naming.json](references/naming.json), only the keys you change.
+Override file: `.skilly/naming.json`, same shape as [references/naming.json](references/naming.json), only the keys you change.
 
 - Objects merge by key. `null` drops a key.
 - Arrays append and dedupe. `"-Data"` drops the default `Data`.
