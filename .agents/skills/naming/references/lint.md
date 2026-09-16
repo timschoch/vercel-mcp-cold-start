@@ -4,7 +4,7 @@ Rule numbers refer to [SKILL.md](../SKILL.md).
 
 ## Machine: the CI gate `naming`
 
-`bundles/workflow/rules/naming.sh` in the hub, run on the files changed in the PR. It reads [naming.json](naming.json) merged with the repo's `docs/agents/naming.json` (merge rules in [SKILL.md](../SKILL.md), Per-project overrides).
+`bundles/workflow/rules/naming.sh` in the hub, run on the files changed in the PR. It reads [naming.json](naming.json) merged with the repo's `.skilly/naming.json` (merge rules in [SKILL.md](../SKILL.md), Per-project overrides).
 
 | Check | Rule | JSON key | Level |
 | --- | --- | --- | --- |
@@ -19,7 +19,7 @@ Rule numbers refer to [SKILL.md](../SKILL.md).
 
 ### Exceptions
 
-`allow` in `docs/agents/naming.json`: one regex string per entry, matched against identifier, env name and file path. A match silences every check for it.
+`allow` in `.skilly/naming.json`: one regex string per entry, matched against identifier, env name and file path. A match silences every check for it.
 
 ```json
 { "allow": ["^MERGED$", "^ctx_"] }

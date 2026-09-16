@@ -5,7 +5,7 @@ description: Mine the user's own agent session logs per model and per harness, c
 
 # Audit agent history
 
-Rules written from guesses miss. Rules written from counted corrections in the user's own logs hit. This skill counts, then proposes at most three lines for `bundles/workflow/rules/workflow-hazards.md`.
+Rules written from guesses miss. Rules written from counted corrections in the user's own logs hit. This skill counts, then proposes at most three lines for `bundles/workflow/rules/workflow-hazards.md`, plus the consumer overlay pairs worth hoisting into their hub rule.
 
 ## Where the logs live
 
@@ -37,6 +37,7 @@ Run the whole audit in one subagent (`model: fable`, `effort: high`). Raw logs n
 5. **Quote** two real examples for each of the top three modes: the assistant action and the user's correction. Redact secrets and every path under the home directory (`~/...`).
 6. **Interrogate one bad thread.** Open the worst session in its own agent with the same model and ask: what gave the indication this was right, which line in the rule file or `CLAUDE.md` was outdated, where was the request misread first. Record the answer under the mode it explains.
 7. **Interrogate one slow thread.** Take the session with the most tool calls per user message. Group its tool calls into categories (orientation reads, repeated reads, checks, edits, verification). Mark the groups that changed nothing about the result as useless.
+8. **Collect overlay pairs.** In each repo in scope, read `.claude/rules/*.local.md`. These hold the bad/good pairs consumers wrote under a synced rule, see `.claude/rules/workflow-writing-standards.md`. A pair that appears in two or more repos, or matches a top-three mode, is a hoist candidate for the rule it extends.
 
 ## Output
 
@@ -52,10 +53,12 @@ Then a `## Proposed hazards` block. At most three rules in the format of `bundle
 1. Never kill a process by port number alone. Two harness instances share a port range; the audit found four kills of the running session in two days. Bad: `kill $(lsof -t -i:3000)`. Good: `ps -o pid,command | grep <name>`, then kill the one pid.
 ```
 
+Then a `## Hoist candidates` block: one line per overlay pair, naming the repo, the rule file and item it extends, and the pair verbatim.
+
 Then hand-off:
 
-- Show the report and the block to the user. Stop.
-- On sign-off, edit `bundles/workflow/rules/workflow-hazards.md` in the hub repo (`timschoch/skilly`) only. Never in a consumer repo: the rule syncs from the hub and the next sync overwrites a local edit.
+- Show the report and both blocks to the user. Stop.
+- On sign-off, edit the rule files under `bundles/workflow/rules/` in the hub repo (`timschoch/skilly`) only. Never in a consumer repo: the rule syncs from the hub and the next sync overwrites a local edit. Hoisted pairs go under the item they extend; the consumer then deletes them from its `.local.md`.
 
 ## References
 

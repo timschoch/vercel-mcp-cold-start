@@ -23,7 +23,7 @@
       "source": "timschoch/skilly",
       "sourceType": "github",
       "skillPath": "bundles/workflow/skills/audit-agent-history/SKILL.md",
-      "computedHash": "19cc423573fecc622f3e71958efccf612abc4800e21de2c8d248a44828d999a9"
+      "computedHash": "1332660ff8cb198ef1f37e0776b2b104a5886c71a0337558175edc74bc734a16"
     },
     "audit-skilly-workflow": {
       "source": "timschoch/skilly",
@@ -137,7 +137,7 @@
       "source": "timschoch/skilly",
       "sourceType": "github",
       "skillPath": "bundles/workflow/skills/naming/SKILL.md",
-      "computedHash": "4bfbe10451af13b3e783ea06ff8c718e3e7cd54b7b6a160526079076b865317e"
+      "computedHash": "b833e773380ad8c37837b710a19ad2da9992e1dc49f47b2aa89f92db0cea2571"
     },
     "orchestrate": {
       "source": "timschoch/skilly",
@@ -185,7 +185,7 @@
       "source": "yigitkonur/skills-by-yigitkonur",
       "sourceType": "github",
       "skillPath": "skills/publish-npm-package/SKILL.md",
-      "computedHash": "c33b2877cb00e46fd1a367fdc6b718160d653a6a4bd57d35c3d43fb795f80d4f"
+      "computedHash": "ee3a87b8c3e40e1a6a9f0f88549a6f4137ba9dd2e7b6374b8bd06da1c35b8cc1"
     },
     "qa": {
       "source": "timschoch/skilly",
@@ -215,7 +215,7 @@
       "source": "timschoch/skilly",
       "sourceType": "github",
       "skillPath": "bundles/workflow/skills/skilly-cli/SKILL.md",
-      "computedHash": "e8c272df1a275624931a82abaf098a962836ec6f0b8b9688c5383e4ff2cc8e5b"
+      "computedHash": "9710d9ab80eebc7a624b6c55bd62b98b5cfa585f1e75ea1f61f391bcda51eed0"
     },
     "step-by-step": {
       "source": "timschoch/skilly",

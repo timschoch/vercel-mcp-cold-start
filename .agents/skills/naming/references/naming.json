@@ -1,5 +1,5 @@
 {
-  "$comment": "Defaults for the naming skill and the naming gate. A consumer overrides them in docs/agents/naming.json, same shape, only the keys it changes. Objects merge by key, null drops a key. Arrays append and dedupe, a leading - drops a default entry. scripts/config.mjs prints the merged result.",
+  "$comment": "Defaults for the naming skill and the naming gate. A consumer overrides them in .skilly/naming.json, same shape, only the keys it changes. Objects merge by key, null drops a key. Arrays append and dedupe, a leading - drops a default entry. scripts/config.mjs prints the merged result.",
   "parts": ["project", "area", "entity", "role", "action", "attribute", "consumer"],
   "discriminant": "kind",
   "artifacts": {
