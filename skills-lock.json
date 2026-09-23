@@ -11,7 +11,7 @@
       "source": "cursor/plugins",
       "sourceType": "github",
       "skillPath": "pstack/skills/arena/SKILL.md",
-      "computedHash": "66e9b8b4486f3fc07ffdf0e0b2874ba1dc411f6df24a440af5873c35a079cefc"
+      "computedHash": "5701bea4669b524d81b73df022a03a6ed146058f44a44c6854d85d29e9ffbe53"
     },
     "ask-matt": {
       "source": "timschoch/mattpocock-skills",
@@ -41,7 +41,7 @@
       "source": "cursor/plugins",
       "sourceType": "github",
       "skillPath": "pstack/skills/blast-radius/SKILL.md",
-      "computedHash": "748de95ad5aae5efa666a8ca5656eb38684b4c64be7b58e27827c9038dc4214c"
+      "computedHash": "b703f11f239a48ce39112c667d334a6f8f80eeb35e6df1f24a9371068a2bb562"
     },
     "cleanup-merged-branches": {
       "source": "timschoch/skilly",
@@ -107,7 +107,7 @@
       "source": "cursor/plugins",
       "sourceType": "github",
       "skillPath": "pstack/skills/how/SKILL.md",
-      "computedHash": "532e080fb8d0f9119488628910d2ff2e2976882b009d3df4e8a29c86016e3207"
+      "computedHash": "6e6468c9d9f56cb78259321ca248dc85623a0783269cb4f855023bce5bdacde8"
     },
     "implement": {
       "source": "timschoch/mattpocock-skills",
@@ -173,7 +173,7 @@
       "source": "cursor/plugins",
       "sourceType": "github",
       "skillPath": "pstack/skills/principle-prove-it-works/SKILL.md",
-      "computedHash": "1ed61e8344e183ef344d70e54294b8bd7eba8b874d58cfcfbbbfd6fad75959b8"
+      "computedHash": "5b936cf21d5e829a9d6953a8ddd9fc5260b725cce10ec8612e0fed59a7bf5910"
     },
     "prototype": {
       "source": "timschoch/mattpocock-skills",
@@ -233,7 +233,7 @@
       "source": "cursor/plugins",
       "sourceType": "github",
       "skillPath": "pstack/skills/technical-writing/SKILL.md",
-      "computedHash": "820fc92bb14b53f5b724fc17e0c1edd3b3a9e96bbe4db1da666a12127b0aac0a"
+      "computedHash": "a513ffa8987ff8528c19a76444de3c3954422c53b2393624976937ca326c52e1"
     },
     "term-check": {
       "source": "timschoch/skilly",
@@ -287,7 +287,7 @@
       "source": "cursor/plugins",
       "sourceType": "github",
       "skillPath": "pstack/skills/unslop/SKILL.md",
-      "computedHash": "3b8676e7461f44026b4d555ff0f3369a761df6033b9b9e2cd5152693cb20fbb2"
+      "computedHash": "6018ca8c329ba87c6b4298207f58d6b773fe23e44ff52a00a9a4d160c19bedc0"
     },
     "vercel-cli": {
       "source": "timschoch/skilly",
@@ -317,7 +317,7 @@
       "source": "cursor/plugins",
       "sourceType": "github",
       "skillPath": "pstack/skills/why/SKILL.md",
-      "computedHash": "552d937a5bad70c5e0c2b92fa21cc914cd4b59d3c1747554a68f26bce9fc9a0f"
+      "computedHash": "6e9d370de316b7ef0c615d1594af7f8c9656a1ce4aca46a67c76d8f8ce2e4b18"
     },
     "wizard": {
       "source": "timschoch/mattpocock-skills",
