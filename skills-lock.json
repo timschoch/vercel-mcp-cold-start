@@ -11,7 +11,7 @@
       "source": "cursor/plugins",
       "sourceType": "github",
       "skillPath": "pstack/skills/arena/SKILL.md",
-      "computedHash": "5701bea4669b524d81b73df022a03a6ed146058f44a44c6854d85d29e9ffbe53"
+      "computedHash": "fa4074c878d632382f15af2ebc540d6eb31daab8d4ea6b7d552684c839f26a3f"
     },
     "ask-matt": {
       "source": "timschoch/mattpocock-skills",
@@ -23,7 +23,7 @@
       "source": "timschoch/skilly",
       "sourceType": "github",
       "skillPath": "bundles/workflow/skills/audit-agent-history/SKILL.md",
-      "computedHash": "1332660ff8cb198ef1f37e0776b2b104a5886c71a0337558175edc74bc734a16"
+      "computedHash": "99fd53d98b51f75937862c22f50dfb43789eee6db8074c7d903d5f6e063ed5a1"
     },
     "audit-skilly-workflow": {
       "source": "timschoch/skilly",
@@ -107,7 +107,7 @@
       "source": "cursor/plugins",
       "sourceType": "github",
       "skillPath": "pstack/skills/how/SKILL.md",
-      "computedHash": "6e6468c9d9f56cb78259321ca248dc85623a0783269cb4f855023bce5bdacde8"
+      "computedHash": "a81bf6a7aec190f01acf26df059899fc7bf655fa3e6873ee7449e7e802c47144"
     },
     "implement": {
       "source": "timschoch/mattpocock-skills",
@@ -137,7 +137,7 @@
       "source": "timschoch/skilly",
       "sourceType": "github",
       "skillPath": "bundles/workflow/skills/naming/SKILL.md",
-      "computedHash": "b833e773380ad8c37837b710a19ad2da9992e1dc49f47b2aa89f92db0cea2571"
+      "computedHash": "26bab79b8f2cd5598b111e85ae6b54e08773b5042e79998c1ea80f44e790b914"
     },
     "orchestrate": {
       "source": "timschoch/skilly",
@@ -149,7 +149,7 @@
       "source": "timschoch/skilly",
       "sourceType": "github",
       "skillPath": "bundles/workflow/skills/plan-critics/SKILL.md",
-      "computedHash": "59a5afc83d5abd4ab0e6613277c16816997edccad259113525bc7a19ddcf19fc"
+      "computedHash": "e61ac12c695041f2e876517bba943f3f389d9ceb178018f2f29e105d135ea667"
     },
     "principle-encode-lessons-in-structure": {
       "source": "cursor/plugins",
@@ -167,13 +167,13 @@
       "source": "cursor/plugins",
       "sourceType": "github",
       "skillPath": "pstack/skills/principle-guard-the-context-window/SKILL.md",
-      "computedHash": "79651832c9b9a87405f02ccba09ee23104b4eca3e87bb31775a30c8ec26f75be"
+      "computedHash": "cd6568d5872c74198787156412c94da0f57bac29f8ee50cde112e2571b79aa32"
     },
     "principle-prove-it-works": {
       "source": "cursor/plugins",
       "sourceType": "github",
       "skillPath": "pstack/skills/principle-prove-it-works/SKILL.md",
-      "computedHash": "5b936cf21d5e829a9d6953a8ddd9fc5260b725cce10ec8612e0fed59a7bf5910"
+      "computedHash": "6777a72ed3c15bbd73f0d264ba4eb701e5e733de70dd519c72fc2698a32379a2"
     },
     "prototype": {
       "source": "timschoch/mattpocock-skills",
@@ -239,7 +239,7 @@
       "source": "timschoch/skilly",
       "sourceType": "github",
       "skillPath": "bundles/workflow/skills/term-check/SKILL.md",
-      "computedHash": "9d9cbd1fde263ff1cbc3ef7265e739f89b78cf99e2e4b2e17fdda9affa0cb230"
+      "computedHash": "919d0874a081fdaf3d5bcbca8ecaa287e7fa438af36f7574aaced2795d5aaa14"
     },
     "thermo-nuclear-code-quality-review": {
       "source": "cursor/plugins",
@@ -317,7 +317,7 @@
       "source": "cursor/plugins",
       "sourceType": "github",
       "skillPath": "pstack/skills/why/SKILL.md",
-      "computedHash": "6e9d370de316b7ef0c615d1594af7f8c9656a1ce4aca46a67c76d8f8ce2e4b18"
+      "computedHash": "0e1f6acfce6fc2c54f059b16d1e2273639f59f828b59c57a6644f895c22d68b2"
     },
     "wizard": {
       "source": "timschoch/mattpocock-skills",

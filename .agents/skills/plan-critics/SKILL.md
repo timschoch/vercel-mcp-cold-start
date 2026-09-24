@@ -39,7 +39,7 @@ The subject is either an implementation plan or a wayfinder map/ticket. Priority
 ## Step 2: Select critics
 
 1. Read `critics/*.md` — **exclude any file whose name starts with `_`** (those are templates)
-2. Parse each file's YAML frontmatter to get `activation` and `model`
+2. Parse each file's YAML frontmatter to get `activation`
 3. **Universal critics** (`activation: "always"`): always included
 4. **Tech critics**: match `activation` keywords against the subject text using word-stem matching
    (generous — "migrate" matches "migration", "component" matches "components")
@@ -72,7 +72,6 @@ Rules:
 - If a bundle would contain >5 critic specs: split into two subagents
 - If methodology is the only active tech critic: merge into whichever bundle is closest, or
   give it its own small subagent
-- **Model for bundle**: highest `model:` value among the bundled critics (opus beats sonnet)
 
 ---
 

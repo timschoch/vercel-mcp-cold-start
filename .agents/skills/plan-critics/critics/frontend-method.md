@@ -3,7 +3,6 @@ name: frontend-method
 type: tech
 activation: "frontend component-architecture feature-folder page-design UI-implementation colocation colocate file-structure"
 standalone-skill: laica-frontend-dev
-model: sonnet
 ---
 
 # Frontend Methodology Critic

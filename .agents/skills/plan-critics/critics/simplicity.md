@@ -2,7 +2,6 @@
 name: simplicity
 type: universal
 activation: "always"
-model: sonnet
 ---
 
 # Simplicity Critic

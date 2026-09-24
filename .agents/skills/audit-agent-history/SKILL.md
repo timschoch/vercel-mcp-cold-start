@@ -26,7 +26,7 @@ Ask for, or default:
 - window: default 30 days, by file mtime or `timestamp`
 - models: default all seen
 
-Run the whole audit in one subagent (`model: fable`, `effort: high`). Raw logs never enter the main context, see [principle-guard-the-context-window](.agents/skills/principle-guard-the-context-window/SKILL.md). The subagent returns the report only.
+Run the whole audit in one subagent. It is deep reasoning over many logs. Raw logs never enter the main context, see [principle-guard-the-context-window](.agents/skills/principle-guard-the-context-window/SKILL.md). The subagent returns the report only.
 
 ## Method
 

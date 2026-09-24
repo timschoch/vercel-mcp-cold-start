@@ -2,7 +2,6 @@
 name: typescript
 type: tech
 activation: "type interface generic infer satisfies declare as-const type-assertion narrowing union intersection"
-model: sonnet
 ---
 
 # TypeScript Critic

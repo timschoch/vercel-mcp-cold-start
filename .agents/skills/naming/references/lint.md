@@ -8,18 +8,22 @@ Rule numbers refer to [SKILL.md](../SKILL.md).
 
 | Check | Rule | JSON key | Level |
 | --- | --- | --- | --- |
-| File and folder names kebab-case | 11 | `artifacts.file.case`, `artifacts.folder.case` | error |
-| Banned short words and single-letter declared names | 4 | `shortWords` | error |
+| Names of code files (`.ts`, `.tsx`, `.js`, `.jsx`, `.mjs`, `.cjs`) and their folders in the configured case (default `kebab`; one name or a list of `kebab`, `snake_case`, `camelCase`, `PascalCase`) | 11 | `artifacts.file.case`, `artifacts.folder.case` | error |
+| Banned short words as a whole declared name (`err` fails, `errMsg` passes), and single-letter declared names | 4 | `shortWords` | error |
 | Noise-word suffix | 3 | `noiseWords` | error |
 | `enum` | 9 | none | error |
 | `I` or `T` prefixed type name | 3 | none | error |
 | Banned verb synonym, replaced by the value | 6 | `synonyms` | error |
-| Env var shape in `.env*.example` | 10 | `artifacts.env.roles`, `artifacts.env.shape` | error |
+| Env var names in `.env*.example` are `UPPER_SNAKE`; a `_FOR_<CONSUMER>` name has a role from the list before `_FOR_`. The full `artifacts.env.shape` is agent judgement: `TWENTY_API_KEY` passes the gate | 10 | `artifacts.env.roles` | error |
 | `type:` used as discriminant | 9 | `discriminant` | warning |
 
 ### Exceptions
 
-`allow` in `.skilly/naming.json`: one regex string per entry, matched against identifier, env name and file path. A match silences every check for it.
+`allow` in `.skilly/naming.json`: one regex string per entry.
+
+- Matches an identifier or env name: silences every check on that name.
+- Matches a file path: skips the file-case check for that file. The names inside it are still checked.
+- The `discriminant` warning ignores `allow`.
 
 ```json
 { "allow": ["^MERGED$", "^ctx_"] }
@@ -27,7 +31,7 @@ Rule numbers refer to [SKILL.md](../SKILL.md).
 
 ## Machine: Biome, opt-in
 
-Consumers on Biome 2.x merge [biome.json](biome.json) into theirs. It covers kebab-case file names, no `I`/`T` prefix on interfaces and type aliases, camelCase functions, PascalCase types, CONSTANT_CASE top-level consts, `noEnum` and `noMagicNumbers`. All rules live in the `style` group. Biome's `match` regex has no lookahead, so the prefix ban is written as a positive pattern.
+Consumers on Biome 2.x merge [biome.json](biome.json) into theirs. It covers kebab-case file names, no `I`/`T` prefix on interfaces and type aliases, camelCase functions, PascalCase types, CONSTANT_CASE or camelCase top-level consts, `noEnum` and `noMagicNumbers`. All rules live in the `style` group. Biome's `match` regex has no lookahead, so the prefix ban is written as a positive pattern.
 
 ## Agent
 

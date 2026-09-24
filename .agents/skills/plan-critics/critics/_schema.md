@@ -19,7 +19,6 @@ type: universal | tech
 activation: "always" | "<keywords>"  # space or comma separated; word-stem matched
 standalone-skill:                     # optional: skill(s) whose SKILL.md the subagent loads first
   - <name>                           # YAML list; single value also accepted as plain string
-model: sonnet | opus                  # default: sonnet
 ---
 ```
 
@@ -28,8 +27,6 @@ Be generous — the orchestrator filters, so false positives here just add a che
 
 `standalone-skill`: when set, the subagent loads the skill's SKILL.md (path resolution order in SKILL.md Step 4 — installed dirs first, launch-repo fetch as fallback) and applies
 its checklist before running its own. Use this for tech areas with an existing skill.
-
-`model: opus` for critics where broad recall matters more than speed (security, codebase).
 
 ---
 

@@ -3,7 +3,6 @@ name: nextjs
 type: tech
 activation: "route page layout app-router pages-router server-component client-component middleware server-action route-handler loading error next.config"
 standalone-skill: vercel-react-best-practices
-model: sonnet
 ---
 
 # Next.js Critic

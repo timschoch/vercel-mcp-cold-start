@@ -2,7 +2,6 @@
 name: shadcn
 type: tech
 activation: "shadcn shadcn-ui radix cmdk vaul ui/button ui/input ui/dialog ui/sheet ui/card ui/badge ui/table ui/ components.json"
-model: sonnet
 ---
 
 # shadcn/ui Critic

@@ -2,7 +2,6 @@
 name: scope-creep
 type: universal
 activation: "always"
-model: sonnet
 ---
 
 # Scope Creep Critic

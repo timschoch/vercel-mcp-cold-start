@@ -12,7 +12,7 @@ set -uo pipefail
 SCENARIO="$1"; shift
 [ -f "$SCENARIO" ] || { echo "no scenario file: $SCENARIO"; exit 2; }
 
-MODELS="opus sonnet haiku"
+MODELS="opus sonnet fable"
 RUNS="1 2"
 OUT=$(mktemp -d)
 NEUTRAL=$(mktemp -d)
