@@ -5,7 +5,6 @@ activation: "component jsx hook useState useEffect useCallback useMemo useRef us
 standalone-skill:
   - vercel-composition-patterns
   - vercel-react-best-practices
-model: sonnet
 ---
 
 # React Critic

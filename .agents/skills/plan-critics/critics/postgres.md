@@ -3,7 +3,6 @@ name: postgres
 type: tech
 activation: "migration schema query index join transaction sql drizzle database db table column constraint foreign-key"
 standalone-skill: postgres-best-practices
-model: sonnet
 ---
 
 # PostgreSQL Critic

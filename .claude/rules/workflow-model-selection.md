@@ -1,58 +1,43 @@
 # Model selection
 
-Good defaults, not law — the developer's word overrides anything here.
+Use this rule each time you start a subagent or a teammate. These are defaults. The developer's instructions override them.
 
-Applies every time an agent spawns a subagent or teammate. Set `model` and
-`effort` explicitly in the agent definition. Never inherit by accident.
+## Pick a model and an effort
 
-## Task -> model + effort
+Set `model` and `effort` in every agent definition. If you leave them out, the agent copies the parent's settings, and those are often wrong for the task.
 
 | Task | `model` | `effort` |
 |---|---|---|
-| Default model | `opus` | `high` |
-| Orchestrating work larger than one context window | `fable` | `low` — confirm with user first |
-| Visual work — UI, design systems components, frontend polish, visual prototypes | `fable` | `high` |
-| Hard coding, architecture, deep reasoning, writing | `fable` | `high` |
-| Normal coding, refactor, multi-file edit, review | `opus` | `high` |
-| Scoped coding, research, test writing | `sonnet` | `medium` |
-| Bulk workers under an orchestrator | `sonnet` | `low` |
-| Single-fact code or web lookup, classification | `haiku` | omit — no effort support |
+| Normal coding, refactoring, edits across many files, code review | `opus` | `medium` |
+| Hard coding, architecture, deep reasoning, writing | `opus` | `high` |
+| Orchestration: splitting work that does not fit in one context window across other agents | `opus` | `low` |
+| Visual work: UI, design system components, frontend polish, visual prototypes | `fable` | `high` |
+| Small coding tasks, research, writing tests | `sonnet` | `medium` |
+| Workers under an orchestrator, simple lookups, classification | `sonnet` | `low` |
 
-Relative token cost (August 2026): Haiku 1x · Sonnet 2x · Opus 5x · Fable 10x.
-Same multiplier for input, output and cache. Add ~30% token inflation for
-Sonnet 5 / Opus 5 / Fable 5 vs Haiku 4.5 (newer tokenizer).
+If no row fits, use `opus` with `medium`.
 
-## Hard rules
+## Rules
 
-1. **Effort before model.** Move effort up or down on the current model before
-   paying for a larger one. Fable at `low` still beats older models at `xhigh`.
-2. **Fable for the hard and the visual, Opus for the routine.** Fable's output
-   quality on visual work and hard problems beats its benchmark numbers — use it
-   there despite the 2x cost over Opus. Routine coding stays on Opus: within
-   0.5% of Fable's peak on CursorBench 3.2 at half the cost per task. Confirm
-   with the user before a Fable *orchestration* spawn.
-3. **One dependent chain -> no orchestrator.** An orchestrator pays for a plan, a
-   handoff and a merge. On serial work a single model at lower effort wins.
-   Orchestrate only to fan out independent pieces or to cap a cost tail.
-4. **Hold effort constant inside one agent's run.** Changing effort mid-session
-   invalidates the prompt cache. Vary effort across agents, never within one.
-5. **Fable can refuse.** Its safety classifiers return `stop_reason: "refusal"`
-   as HTTP 200. Name a fallback model for any unattended Fable job.
-6. **Delegate only for breadth, parallelism, or review.** Work one agent
-   finishes in one pass → do it yourself. Spawn a subagent only when:
-   - the task needs heavy reading (research, broad search, many files),
-   - the parts are independent and can run at the same time, or
-   - you want a second review free of your own bias.
+1. **Change the effort before you change the model.** Try a higher effort on the same model first. Use `max` only by hand, after `high` failed.
+2. **Use Fable only for visual work.** Opus scores higher on benchmarks. Fable makes better-looking UI and designs.
+3. **Keep the effort the same during one agent's run.** A change in effort clears the prompt cache. Give different agents different efforts instead.
+4. **Do not orchestrate serial work.** When each step needs the result of the step before, use one agent. Orchestrate only parts that can run at the same time.
+5. **Delegate only when it helps.** If one agent can finish the work in one pass, do it yourself. Start a subagent only for:
+   - heavy reading: research, a broad search, many files
+   - independent parts that can run at the same time
+   - a second review, free from your own bias
 
-   Bring back the conclusion, not the raw payload.
+   The subagent returns its conclusion, not its raw output.
+6. **Fable can refuse a task.** It returns `stop_reason: "refusal"` with HTTP 200, so the call looks like a success. Name a fallback model for each Fable job that runs without a person watching.
 
-## Frontmatter
+## Example
 
 ```yaml
 ---
 name: bulk-worker
-description: Executes one scoped subtask handed down by an orchestrator.
-model: sonnet     # sonnet | opus | haiku | fable | full ID | inherit
-effort: low       # low | medium | high | xhigh | max — omit for haiku
+description: Does one small task that an orchestrator hands to it.
+model: sonnet     # sonnet | opus | fable | full model ID | inherit
+effort: low       # low | medium | high | xhigh | max
 ---
 ```

@@ -2,7 +2,6 @@
 name: trigger
 type: tech
 activation: "trigger.dev triggerjobs task job queue retry idempotent background-job scheduled-task worker"
-model: sonnet
 ---
 
 # Trigger.dev Critic

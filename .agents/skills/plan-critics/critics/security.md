@@ -3,7 +3,6 @@ name: security
 type: universal
 activation: "always"
 standalone-skill: security-best-practices
-model: opus
 ---
 
 # Security Critic

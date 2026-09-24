@@ -93,7 +93,7 @@ Before you name anything, run `node .agents/skills/naming/scripts/config.mjs` an
     | `TestimonialGrid` | `GridTestimonial` | entity first, then role |
     | `testimonial.added` | `addTestimonial` | an event is a fact in the past, not a command |
 
-11. Casing follows the language guide and the repo's linter. Files and folders are lowercase kebab-case. An existing repo convention wins over this line.
+11. Casing follows the language guide and the repo's linter. Files and folders are lowercase kebab-case. An existing repo convention wins over this line: set it in `artifacts.file.case` and `artifacts.folder.case`, one case or a list (`["kebab", "PascalCase", "camelCase"]` for React components and hooks).
 
     | Good | Bad | Why |
     | --- | --- | --- |
@@ -111,7 +111,7 @@ Before you name anything, run `node .agents/skills/naming/scripts/config.mjs` an
 
 ## Per-project overrides
 
-Override file: `.skilly/naming.json`, same shape as [references/naming.json](references/naming.json), only the keys you change.
+Override file: `.skilly/naming.json`, same shape as [references/naming.json](references/naming.json), only the keys you change. An old `docs/agents/naming.json` is read only while `.skilly/naming.json` is missing: move it to `.skilly/naming.json`.
 
 - Objects merge by key. `null` drops a key.
 - Arrays append and dedupe. `"-Data"` drops the default `Data`.
@@ -125,7 +125,7 @@ Override file: `.skilly/naming.json`, same shape as [references/naming.json](ref
 }
 ```
 
-`allow` holds one regex string per entry, matched against identifier, env name and file path. A match silences every check for it.
+`allow` holds one regex string per entry. What a match silences: [references/lint.md](references/lint.md#exceptions).
 
 ## References
 

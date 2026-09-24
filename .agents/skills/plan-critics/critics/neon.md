@@ -2,7 +2,6 @@
 name: neon
 type: tech
 activation: "neon neonctl branch database-branch PROD_DATABASE_URL STAGING_DATABASE_URL connection-pooling serverless"
-model: sonnet
 ---
 
 # Neon Critic

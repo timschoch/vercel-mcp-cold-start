@@ -3,7 +3,6 @@ name: payload
 type: tech
 activation: "payload collection field hook access block global lexical richtext payload.config payloadcms"
 standalone-skill: payload
-model: sonnet
 ---
 
 # Payload CMS Critic

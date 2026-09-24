@@ -2,7 +2,6 @@
 name: vercel
 type: tech
 activation: "vercel deployment edge-function vercel.json cron-job vercel-blob build-config region function-size environment-variable vercel-cron"
-model: sonnet
 ---
 
 # Vercel Critic

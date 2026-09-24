@@ -2,7 +2,6 @@
 name: analytics
 type: tech
 activation: "posthog analytics event-tracking capture identify feature-flag A/B-test pageview analytics-event tracking"
-model: sonnet
 ---
 
 # Analytics Critic

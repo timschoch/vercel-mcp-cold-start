@@ -2,7 +2,6 @@
 name: edge-cases
 type: universal
 activation: "always"
-model: sonnet
 ---
 
 # Edge Cases Critic

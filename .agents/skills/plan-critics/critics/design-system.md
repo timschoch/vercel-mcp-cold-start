@@ -6,7 +6,6 @@ standalone-skill:
   - laica-design-audit
   - laica-design-tokens
   - laica-component-styling
-model: sonnet
 ---
 
 # Design System Critic

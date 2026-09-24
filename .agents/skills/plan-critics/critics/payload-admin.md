@@ -3,7 +3,6 @@ name: payload-admin
 type: tech
 activation: "admin panel admin-component custom-view field-component collection-view global-view payload admin.components root-view"
 standalone-skill: payload-admin-components
-model: sonnet
 ---
 
 # Payload Admin Components Critic

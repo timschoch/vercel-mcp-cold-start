@@ -2,7 +2,6 @@
 name: red-team
 type: universal
 activation: "always"
-model: opus
 ---
 
 # Red-Team Critic

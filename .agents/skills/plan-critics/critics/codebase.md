@@ -2,7 +2,6 @@
 name: codebase
 type: universal
 activation: "always"
-model: opus
 ---
 
 # Codebase Critic
