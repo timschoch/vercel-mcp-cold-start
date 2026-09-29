@@ -1,5 +1,5 @@
 {
-  "$comment": "Defaults for the naming skill and the naming gate. A consumer overrides them in .skilly/naming.json, same shape, only the keys it changes. Objects merge by key, null drops a key. Arrays append and dedupe, a leading - drops a default entry. scripts/config.mjs prints the merged result.",
+  "$comment": "Defaults for the naming skill and the naming gate. Stack files in stacks/<bundle>.json merge on top for each bundle the consumer picked. A consumer overrides them in .skilly/naming.json, same shape, only the keys it changes. Objects merge by key, null drops a key. Arrays append and dedupe, a leading - drops a default entry. scripts/config.mjs prints the merged result.",
   "parts": ["project", "area", "entity", "role", "action", "attribute", "consumer"],
   "discriminant": "kind",
   "artifacts": {
@@ -360,5 +360,21 @@
     "pkgs": "packages"
   },
   "noiseWords": ["Data", "Info", "Manager", "Processor", "Helper", "Util", "Utils", "List"],
-  "allow": []
+  "allow": {
+    "vendored": {
+      "paths": ["(^|/)(node_modules|dist|build|\\.next)/"],
+      "rules": "*",
+      "why": "Installed or built output. The repo does not write it."
+    },
+    "agentTooling": {
+      "paths": ["(^|/)(\\.agents|\\.claude|\\.skilly-hub)/"],
+      "rules": "*",
+      "why": "Skills and hub files that skilly vendors. Sync overwrites them."
+    },
+    "generated": {
+      "paths": ["\\.generated\\.[^/]*$", "\\.d\\.ts$"],
+      "rules": "*",
+      "why": "Generated code. The generator picks the names."
+    }
+  }
 }

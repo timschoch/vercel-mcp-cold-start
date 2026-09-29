@@ -113,6 +113,14 @@ Before you name anything, run `node .agents/skills/naming/scripts/config.mjs` an
 
 Override file: `.skilly/naming.json`, same shape as [references/naming.json](references/naming.json), only the keys you change. An old `docs/agents/naming.json` is read only while `.skilly/naming.json` is missing: move it to `.skilly/naming.json`.
 
+Merge order:
+
+1. [references/naming.json](references/naming.json)
+2. `references/stacks/<bundle>.json`, for each bundle listed in `.skilly/config.json` `bundles`, in that order. Missing file: skipped. Bundles reached only through `includes` do not count.
+3. `.skilly/naming.json`
+
+Merge rules:
+
 - Objects merge by key. `null` drops a key.
 - Arrays append and dedupe. `"-Data"` drops the default `Data`.
 - Scalars override.
@@ -121,15 +129,19 @@ Override file: `.skilly/naming.json`, same shape as [references/naming.json](ref
 {
   "prefixes": { "sync": { "meaning": "mirror to a remote system", "not": ["push", "mirror"] } },
   "noiseWords": ["-Data"],
-  "allow": ["^ctx_"]
+  "allow": {
+    "ctxTools": { "names": ["^ctx_"], "rules": ["short-word"], "why": "lean-ctx tool names." },
+    "payload/migrations": null
+  }
 }
 ```
 
-`allow` holds one regex string per entry. What a match silences: [references/lint.md](references/lint.md#exceptions).
+`allow` holds named entries. Shape and what they silence: [references/lint.md](references/lint.md#exceptions).
 
 ## References
 
 - [references/naming.json](references/naming.json): prefixes, parts, artifacts, short words, noise words, synonyms, discriminant, allow
+- [references/stacks/](references/stacks/): per-bundle defaults, same shape
 - [references/lint.md](references/lint.md): what the CI gate checks, what you judge, per-repo exceptions
 - [references/biome.json](references/biome.json): opt-in Biome block for consumers
 - [scripts/config.mjs](scripts/config.mjs): prints the merged config
