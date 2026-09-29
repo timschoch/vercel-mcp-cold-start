@@ -4,29 +4,50 @@ Rule numbers refer to [SKILL.md](../SKILL.md).
 
 ## Machine: the CI gate `naming`
 
-`bundles/workflow/rules/naming.sh` in the hub, run on the files changed in the PR. It reads [naming.json](naming.json) merged with the repo's `.skilly/naming.json` (merge rules in [SKILL.md](../SKILL.md), Per-project overrides).
+`bundles/workflow/rules/naming.sh` in the hub, run on the files changed in the PR. It reads [naming.json](naming.json) merged with the stack files and the repo's `.skilly/naming.json` (merge order in [SKILL.md](../SKILL.md), Per-project overrides).
 
-| Check | Rule | JSON key | Level |
-| --- | --- | --- | --- |
-| Names of code files (`.ts`, `.tsx`, `.js`, `.jsx`, `.mjs`, `.cjs`) and their folders in the configured case (default `kebab`; one name or a list of `kebab`, `snake_case`, `camelCase`, `PascalCase`) | 11 | `artifacts.file.case`, `artifacts.folder.case` | error |
-| Banned short words as a whole declared name (`err` fails, `errMsg` passes), and single-letter declared names | 4 | `shortWords` | error |
-| Noise-word suffix | 3 | `noiseWords` | error |
-| `enum` | 9 | none | error |
-| `I` or `T` prefixed type name | 3 | none | error |
-| Banned verb synonym, replaced by the value | 6 | `synonyms` | error |
-| Env var names in `.env*.example` are `UPPER_SNAKE`; a `_FOR_<CONSUMER>` name has a role from the list before `_FOR_`. The full `artifacts.env.shape` is agent judgement: `TWENTY_API_KEY` passes the gate | 10 | `artifacts.env.roles` | error |
-| `type:` used as discriminant | 9 | `discriminant` | warning |
+The gate checks declared names only. It skips a destructured key without a rename, like `{ req }`, because the object's owner picked it. In `{ req: request }` it checks `request`.
+
+| Check | Rule ID | Rule | JSON key | Level |
+| --- | --- | --- | --- | --- |
+| Names of code files (`.ts`, `.tsx`, `.js`, `.jsx`, `.mjs`, `.cjs`) and their folders in the configured case (default `kebab`; one name or a list of `kebab`, `snake_case`, `camelCase`, `PascalCase`) | `file-case` | 11 | `artifacts.file.case`, `artifacts.folder.case` | error |
+| Banned short words as a whole declared name (`err` fails, `errMsg` passes), and single-letter declared names | `short-word` | 4 | `shortWords` | error |
+| Noise-word suffix | `noise-word` | 3 | `noiseWords` | error |
+| `enum` | `enum` | 9 | none | error |
+| `I` or `T` prefixed type name | `type-prefix` | 3 | none | error |
+| Banned verb synonym, replaced by the value | `verb-synonym` | 6 | `synonyms` | error |
+| Env var names in `.env*.example` are `UPPER_SNAKE`; a `_FOR_<CONSUMER>` name has a role from the list before `_FOR_`. The full `artifacts.env.shape` is agent judgement: `TWENTY_API_KEY` passes the gate | `env-shape` | 10 | `artifacts.env.roles` | error |
+| `type:` used as discriminant | `discriminant` | 9 | `discriminant` | warning |
 
 ### Exceptions
 
-`allow` in `.skilly/naming.json`: one regex string per entry.
+`allow` holds named entries from three places:
 
-- Matches an identifier or env name: silences every check on that name.
-- Matches a file path: skips the file-case check for that file. The names inside it are still checked.
-- The `discriminant` warning ignores `allow`.
+- [naming.json](naming.json): `vendored`, `agentTooling`, `generated`
+- [stacks/](stacks/): one file per bundle, keys like `payload/migrations`
+- `.skilly/naming.json`: the repo's own entries
+
+`null` on a key drops that entry.
+
+| Field | Content |
+| --- | --- |
+| `paths` | Regexes on the repo-relative file path |
+| `names` | Regexes on the flagged name: identifier, env name, file or folder segment, `type` for `discriminant` |
+| `rules` | Rule IDs from the table above, or `"*"` |
+| `why` | Required. Why the names are not ours to pick |
+
+- A finding is silenced when every given list matches and `rules` names its rule. Failures and warnings alike.
+- An entry with `paths`, rules `"*"` and no `names` skips the file before the gate reads it.
+- A malformed entry fails the gate: no `paths` and no `names`, unknown rule ID, bad regex, empty `why`.
+- An old flat list (`"allow": ["^ctx_"]`) fails the gate. Any skilly verb, the nightly sync included, converts it in place; fill in each `why` after.
 
 ```json
-{ "allow": ["^MERGED$", "^ctx_"] }
+{
+  "allow": {
+    "merged": { "names": ["^MERGED$"], "rules": ["short-word"], "why": "GitHub's merge state name." },
+    "legacyApi": { "paths": ["^src/legacy/"], "rules": "*", "why": "Frozen until the v2 cut-over." }
+  }
+}
 ```
 
 ## Machine: Biome, opt-in

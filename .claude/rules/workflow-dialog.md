@@ -15,3 +15,6 @@ Good defaults, not law — the developer's word overrides anything here.
 7. Sub-items nest under their parent number: `12.1`, `12.2`.
    - Bad: "12. Three options: A foo, B bar, C baz."
    - Good: "12. Three options:" then `12.1 foo`, `12.2 bar`, `12.3 baz`.
+8. A question with two or more options gets one sub-item per option. Mark your pick with **recommended** at the start of its sub-item. No separate "I recommend" sentence.
+   - Bad: "1. Fix it with the same dot rule for folders and files? Or the narrower fix from the issue? I recommend the same dot rule."
+   - Good: "1. How do you want it fixed?" then `1.1 **recommended** same dot rule for folders and files`, `1.2 narrower fix from the issue, only for route folders`.
