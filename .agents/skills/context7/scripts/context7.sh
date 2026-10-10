@@ -1,4 +1,6 @@
 #!/bin/bash
+# SPDX-License-Identifier: MIT
+# SPDX-FileCopyrightText: Netresearch DTT GmbH
 # Context7 REST API wrapper
 # Based on @upstash/context7-mcp source
 # Usage: context7.sh <command> [args...]
@@ -11,14 +13,19 @@ set -e
 CONTEXT7_API_KEY="${CONTEXT7_API_KEY:-}"
 BASE_URL="https://context7.com/api/v2"
 
-# Build auth header if API key is set
-build_headers() {
-    local headers=()
+# GET a URL with the source header and, when CONTEXT7_API_KEY is set, the
+# API key as a bearer token. The key reaches curl on standard input
+# (`-H @-`, curl 7.55 or later), never on its command line, which other
+# local users can read from the process list. printf is a shell builtin, so
+# the key is in no process's arguments at all.
+api_get() {
+    local url="$1"
     if [ -n "$CONTEXT7_API_KEY" ]; then
-        headers+=(-H "Authorization: Bearer $CONTEXT7_API_KEY")
+        printf 'Authorization: Bearer %s\n' "$CONTEXT7_API_KEY" |
+            curl -s "$url" -H "X-Context7-Source: claude-skill" -H @-
+    else
+        curl -s "$url" -H "X-Context7-Source: claude-skill"
     fi
-    headers+=(-H "X-Context7-Source: claude-skill")
-    echo "${headers[@]}"
 }
 
 # Search for library ID
@@ -39,11 +46,7 @@ search_library() {
     echo "---"
 
     local response
-    if [ -n "$CONTEXT7_API_KEY" ]; then
-        response=$(curl -s "$url" -H "Authorization: Bearer $CONTEXT7_API_KEY")
-    else
-        response=$(curl -s "$url")
-    fi
+    response=$(api_get "$url")
 
     # Format results
     echo "$response" | jq -r '
@@ -99,14 +102,7 @@ fetch_docs() {
     echo "Mode: $mode${topic:+ | Topic: $topic}"
     echo "---"
 
-    if [ -n "$CONTEXT7_API_KEY" ]; then
-        curl -s "$url" \
-            -H "Authorization: Bearer $CONTEXT7_API_KEY" \
-            -H "X-Context7-Source: claude-skill"
-    else
-        curl -s "$url" \
-            -H "X-Context7-Source: claude-skill"
-    fi
+    api_get "$url"
 }
 
 # Main command dispatch
