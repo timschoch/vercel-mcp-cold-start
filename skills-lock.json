@@ -157,6 +157,12 @@
       "skillPath": "bundles/workflow/skills/plan-critics/SKILL.md",
       "computedHash": "e61ac12c695041f2e876517bba943f3f389d9ceb178018f2f29e105d135ea667"
     },
+    "pr": {
+      "source": "timschoch/mattpocock-skills",
+      "sourceType": "github",
+      "skillPath": "skills/engineering/pr/SKILL.md",
+      "computedHash": "22a15d4d469344b38e03eb0e95772478393975836289393b1bad3c0febcdc679"
+    },
     "principle-encode-lessons-in-structure": {
       "source": "cursor/plugins",
       "sourceType": "github",
