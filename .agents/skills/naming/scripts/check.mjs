@@ -18,6 +18,7 @@ import { existsSync, readFileSync, realpathSync } from 'node:fs';
 import { extname, join } from 'node:path';
 import { pathToFileURL } from 'node:url';
 import { compileAllow, loadNamingConfig } from './config.mjs';
+import { defaultBranch } from './default-branch.mjs';
 
 const CODE_EXTENSIONS = new Set(['.ts', '.tsx', '.js', '.jsx', '.mjs', '.cjs']);
 const ENV_EXAMPLE = /^\.env(\.[^.]+)*\.(example|sample)$/;
@@ -487,21 +488,18 @@ const plural = (count, word) => `${count} ${word}${count === 1 ? '' : 's'}`;
 
 const git = (...args) => spawnSync('git', args, { encoding: 'utf8' });
 
-// The base branch: GITHUB_BASE_REF on pull_request events, then DEFAULT_BRANCH,
-// then origin/HEAD, then main. Its origin ref when fetched, else the local one.
+// The base branch: GITHUB_BASE_REF on pull_request events, else the default
+// branch. Its origin ref when fetched, else the local one.
 function baseRef() {
-  const branch =
-    process.env.GITHUB_BASE_REF ||
-    process.env.DEFAULT_BRANCH ||
-    git('symbolic-ref', '--short', 'refs/remotes/origin/HEAD').stdout.trim().replace(/^origin\//, '') ||
-    'main';
+  const branch = process.env.GITHUB_BASE_REF || defaultBranch();
   return git('rev-parse', '--verify', '--quiet', `origin/${branch}`).status === 0 ? `origin/${branch}` : branch;
 }
 
-// Files the branch adds or changes over its base. Untouched files are out of
-// scope by construction: the gate never asks for a rename sweep.
+// Files the branch adds or changes over its base, read from the working tree so
+// staged work counts before its commit. Untouched files are out of scope by
+// construction: the gate never asks for a rename sweep.
 function changedFiles(ref) {
-  const diff = git('diff', '--name-only', '--diff-filter=ACMR', `${ref}...HEAD`);
+  const diff = git('diff', '--merge-base', '--name-only', '--diff-filter=ACMR', ref);
   if (diff.status !== 0) throw new Error(`git diff over ${ref} failed: ${diff.stderr.trim()}`);
   return diff.stdout.split('\n').filter(Boolean);
 }
