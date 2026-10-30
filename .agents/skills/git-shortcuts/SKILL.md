@@ -30,8 +30,7 @@ git ls-remote --exit-code --heads origin staging > /dev/null 2>&1 && echo LEGACY
 
 ```bash
 branch=$(git symbolic-ref --short HEAD)
-trunk=$(git symbolic-ref --short refs/remotes/origin/HEAD 2> /dev/null | sed 's|^origin/||')
-trunk=${trunk:-main}
+trunk=$(node .agents/skills/verify/scripts/default-branch.mjs)
 
 if [ -f .agents/hooks/lib/branch-name.sh ]; then
   . .agents/hooks/lib/branch-name.sh
@@ -45,7 +44,7 @@ else
 fi
 ```
 
-`$trunk` is the repo's default branch — `main` everywhere so far, but read, not assumed. `$base` is what `pr` targets: the trunk, or the epic the ticket was cut from.
+`$trunk` is the repo's default branch: read, not assumed. `$base` is what `pr` targets: the trunk, or the epic the ticket was cut from.
 
 A wrong base produces a *smaller* diff, and a small diff is what a review reports as clean — so an `epic/*` base that cannot be verified on `origin` falls back to the trunk. Never the other way round.
 
@@ -78,12 +77,12 @@ Read `../babysit-pr/SKILL.md` next to this skill in full and follow it in merge 
 - Bad: `perf(server): negotiate per-message deflate on the websocket`
 - Good: `perf(server): cut websocket frame size by 70% with gzipping`
 
-**Body.** Open with the problem in the user's own words, then the solution in a few lines. Never an implementation inventory.
+**Body.** `../pr/SKILL.md` next to this skill exists → read it in full and write the body from its template; the two lines below do not apply. Missing → open with the problem in the user's own words, then the solution in a few lines. Never an implementation inventory.
 
 - Bad: "Removed implicit workspace carryover from every new thread entry point …"
 - Good: "My new worktree default was ignored when starting new threads on existing worktrees."
 
-Diff over ~200 lines → add a short "How to review" pointer naming where to start. End the body with the attribution lines the session provides.
+Either way: diff over ~200 lines → add a short "How to review" pointer naming where to start. End the body with the attribution lines the session provides.
 
 **Never a draft PR.** Review bots only run on a real one.
 

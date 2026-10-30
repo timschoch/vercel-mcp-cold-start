@@ -37,12 +37,12 @@
     "build": "tsup",
     "typecheck": "tsc --noEmit",
     "test": "vitest run",
-    "prepare": "husky"
+    "prepare": "lefthook install --reset-hooks-path"
   },
   "devDependencies": {
     "@types/node": "^22.10.0",
     "hono": "^4.10.7",
-    "husky": "^9.1.7",
+    "lefthook": "^2.2.2",
     "lint-staged": "^17.5.0",
     "prettier": "^3.9.6",
     "tsup": "^8.5.1",

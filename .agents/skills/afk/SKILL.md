@@ -1,6 +1,6 @@
 ---
 name: afk
-description: Take a task and run it alone while the user is away, up to staged changes, an open PR or a merged PR. Stops on low confidence, growing blast radius or a block. Use when the user runs /afk with a task or issue.
+description: Take a task and run it alone while the user is away, up to committed changes, an open PR or a merged PR. Stops on low confidence, growing blast radius or a block. Use when the user runs /afk with a task or issue.
 disable-model-invocation: true
 argument-hint: <task|issue-url>
 ---
@@ -17,12 +17,12 @@ The user waits on nothing. In the first reply:
 
    ```markdown
    1. End with?
-      1.1 staged changes
+      1.1 committed changes
       1.2 open PR
       1.3 merged PR
    ```
 
-2. Spawn a researcher agent in the background. Pick its model per the repo's model rule. Task: read the issue with its comments, the code it names, `CONTEXT.md` and related ADRs, then return a draft of the brief below.
+2. Spawn a researcher agent in the background. Pick its model per the repo's model rule. Task: read the issue with its comments, the code it names, `GLOSSARY.md` and related ADRs, then return a draft of the brief below.
 3. End the turn.
 
 Numbering follows `.claude/rules/workflow-dialog.md`.
@@ -66,11 +66,11 @@ On a stop, leave the work uncommitted and print the report in the `/progress` sh
 
 ## 5. End
 
-The end state answer is the user's sign-off in advance. It replaces the approval step of `.claude/rules/workflow-sign-off.md` for this task only.
+The end state answer is the user's sign-off in advance. It replaces the approval step of `.claude/rules/workflow-done.md` for this task only.
 
 | End state | Do |
 | --- | --- |
-| staged changes | Stage the work, stop. |
+| committed changes | Commit the work, stop. |
 | open PR | Commit, push, open the PR. Stop at green CI. |
 | merged PR | As open PR, then apply `.agents/skills/babysit-pr/SKILL.md` with `--merge`. |
 
