@@ -1,0 +1,9 @@
+extends:
+  - .skilly/lefthook.json
+
+pre-commit:
+  commands:
+    husky:
+      run: |
+        npm run typecheck
+        npm run test

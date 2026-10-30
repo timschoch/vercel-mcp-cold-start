@@ -15,10 +15,14 @@ The rules live in sidecar files, one per style, so only what applies gets inject
 - [rules/all.md](rules/all.md) — every file: audience, words and links, the never list, where a statement lives
 - [rules/plain.md](rules/plain.md) — a person reads it: README, docs, code comments
 - [rules/dense.md](rules/dense.md) — only an agent reads it: CLAUDE.md, AGENTS.md, skill files, agent docs; where both could apply, dense wins
-- [rules/git.md](rules/git.md) — commits, PRs, issues; the format is enforced by setup-repo's commit gate
+- [rules/git.md](rules/git.md) — commits, PRs, issues; the format is enforced by the workflow Bundle's commit-msg hook
 
 Reviewing or writing prose by hand? Read the sidecars above — this file holds no rule.
 
 ## Injection on write actions
 
 [scripts/inject-writing-rules.mjs](scripts/inject-writing-rules.mjs) is a PreToolUse hook: on every file-writing tool call it prints the matching rules (all + plain|dense by path) as additional context, so the writer sees them without loading this skill. `/setup-repo` wires it into `.claude/settings.json`. Markdown files only; `node_modules`, `.temp/` and the synced `.claude/skills`/`.claude/rules` trees are skipped.
+
+## Mermaid check
+
+[scripts/check-mermaid.mjs](scripts/check-mermaid.mjs) parses every mermaid diagram in the `.md`, `.mdx` and `.mmd` files a branch changes. The verify skill's `push` stage runs it. It needs the repo's `mermaid` and `jsdom` devDependencies; `/setup-repo` installs them.
