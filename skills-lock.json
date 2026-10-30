@@ -103,6 +103,12 @@
       "skillPath": "skills/productivity/grilling/SKILL.md",
       "computedHash": "4dd886b0196bf43729d954ae326016f2bd9f5f79d892500b407c33a753362f14"
     },
+    "hallmark": {
+      "source": "nutlope/hallmark",
+      "sourceType": "github",
+      "skillPath": "skills/hallmark/SKILL.md",
+      "computedHash": "611aa02a0444197b38896cb3073866ae9563f10005f7d14e7bf4baf8ab58f437"
+    },
     "handoff": {
       "source": "timschoch/mattpocock-skills",
       "sourceType": "github",
@@ -156,6 +162,12 @@
       "sourceType": "github",
       "skillPath": "bundles/workflow/skills/plan-critics/SKILL.md",
       "computedHash": "e61ac12c695041f2e876517bba943f3f389d9ceb178018f2f29e105d135ea667"
+    },
+    "pr": {
+      "source": "timschoch/mattpocock-skills",
+      "sourceType": "github",
+      "skillPath": "skills/engineering/pr/SKILL.md",
+      "computedHash": "22a15d4d469344b38e03eb0e95772478393975836289393b1bad3c0febcdc679"
     },
     "principle-encode-lessons-in-structure": {
       "source": "cursor/plugins",
