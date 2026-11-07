@@ -1,7 +1,6 @@
 {
   "detect": { "dependencies": ["react"] },
   "includes": [],
-  "rules": [],
   "sources": [
     {
       "source": "vercel-labs/agent-skills",

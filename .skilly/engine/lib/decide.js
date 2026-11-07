@@ -2,9 +2,11 @@ import { existsSync, readFileSync, readdirSync } from 'node:fs';
 import { join } from 'node:path';
 import { HUB_OWNERS, HUB_REPO } from './constants.js';
 import { ghCli } from './delivery.js';
-import { detectPackageManager, listManagedSecrets } from './managed-files.js';
+import { listManagedSecrets } from './managed-files.js';
+import { detectPackageManager, namesNoPackageManager } from './package-manager.js';
 import { validateSettings } from './repo-settings.js';
 import { resolveBundles } from './resolve.js';
+import { tryRun } from './run.js';
 import { selfSource } from './self-source.js';
 import { hubInvite } from './setup.js';
 import * as skillyFile from './skilly-file.js';
@@ -47,14 +49,15 @@ function listHintReasons(cwd, detect = {}, dependencies) {
 }
 
 // Every Bundle of the Release, by name. ticked: its detect hints match the
-// repo, or .skilly/config.json already holds it. reasons say why.
+// repo, or .skilly/config.json already holds it. reasons say why. tiers: the
+// tiers that tick it; the chat ticks it once the person picks one of them.
 export function listBundles({ cwd, snapshotDir }) {
   const chosen = skillyFile.exists(cwd) ? skillyFile.read(cwd).bundles : [];
   const dependencies = listDependencies(cwd);
   return readBundleConfigs(snapshotDir).map(({ name, config }) => {
     const reasons = chosen.includes(name) ? ['in .skilly/config.json'] : [];
     reasons.push(...listHintReasons(cwd, config.detect, dependencies));
-    return { name, ticked: reasons.length > 0, reasons };
+    return { name, ticked: reasons.length > 0, reasons, ...(config.tiers && { tiers: config.tiers }) };
   });
 }
 
@@ -145,6 +148,11 @@ export function listPreflightChecks({ cwd, snapshotDir, repo = selfSource(cwd), 
   }
 
   const installer = attempt(() => detectPackageManager(cwd));
-  add('package manager', !installer.error, installer.error ?? installer.value);
+  // A new Consumer gets pnpm in package.json, and the apply phase runs pnpm to create the lockfile.
+  const needsPnpm = existsSync(join(cwd, 'package.json')) && namesNoPackageManager(cwd);
+  if (installer.error) add('package manager', false, installer.error);
+  else if (needsPnpm && tryRun('pnpm', ['--version'], { cwd }) === null)
+    add('package manager', false, 'pnpm is not on PATH, and Setup runs it to create pnpm-lock.yaml. Run: npm install -g pnpm');
+  else add('package manager', true, installer.value.name);
   return checks;
 }

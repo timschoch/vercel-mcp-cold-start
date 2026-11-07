@@ -1,7 +1,6 @@
 {
   "detect": { "dependencies": ["resend"] },
   "includes": [],
-  "rules": [],
   "sources": [
     {
       "source": "resend/resend-skills",

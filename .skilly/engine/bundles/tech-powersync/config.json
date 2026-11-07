@@ -1,7 +1,6 @@
 {
   "detect": { "dependencies": ["@powersync/*"] },
   "includes": [],
-  "rules": [],
   "sources": [
     {
       "source": "powersync-ja/agent-skills",

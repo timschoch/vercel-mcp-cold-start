@@ -1,7 +1,6 @@
 {
   "detect": { "dependencies": ["@shopify/*"], "files": ["shopify.app.toml"] },
   "includes": [],
-  "rules": [],
   "sources": [
     {
       "source": "Shopify/Shopify-AI-Toolkit",

@@ -1,5 +1,7 @@
 import { existsSync, readFileSync, writeFileSync, appendFileSync } from 'node:fs';
 import { join } from 'node:path';
+import { MANAGED_PATHS } from './managed-files.js';
+import { LOCKFILES } from './package-manager.js';
 
 // Skilly-owned files are not the consumer's code — keep its formatter off
 // them, or every Sync PR fails the consumer's own CI (design record, #17).
@@ -7,6 +9,10 @@ import { join } from 'node:path';
 // by the next skilly verb, and the nightly update heals every consumer.
 const SKILLY_FILES = ['skills-lock.json'];
 const SKILLY_DIRS = ['.skilly', '.claude/rules', '.claude/skills', '.agents'];
+// A package manager writes its lockfile and the Sync writes each Managed file, so a Prettier run
+// on them only makes a diff the next install or Sync reverts. Biome ignores lockfiles on its own
+// and formats no YAML, so only .prettierignore lists them.
+const PRETTIER_ONLY_FILES = [...LOCKFILES, ...MANAGED_PATHS];
 
 // Biome 2.2 warns on a folder written as `dir/**` (useBiomeIgnoreFolder) and
 // crawls the folder anyway, Biome 1.x reads only the glob, and .prettierignore
@@ -90,7 +96,7 @@ export function addFormatterIgnores(cwd) {
     writeFileSync(prettierIgnore, kept.join('\n'));
     console.log('rewrote skilly-owned folders in .prettierignore');
   }
-  const missing = missingFrom(kept, forms);
+  const missing = [...missingFrom(kept, forms), ...PRETTIER_ONLY_FILES.filter((path) => !kept.includes(path))];
   if (missing.length) {
     appendFileSync(prettierIgnore, `${kept.length ? '\n' : ''}# skilly-owned files\n${missing.join('\n')}\n`);
     console.log('added skilly-owned files to .prettierignore');

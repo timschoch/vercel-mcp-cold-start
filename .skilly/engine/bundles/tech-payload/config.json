@@ -1,7 +1,6 @@
 {
   "detect": { "dependencies": ["payload", "@payloadcms/*"] },
   "includes": [],
-  "rules": [],
   "sources": [
     {
       "source": "payloadcms/skills",
