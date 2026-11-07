@@ -14,9 +14,9 @@ import { join, relative } from 'node:path';
 import { HUB_REPO } from './constants.js';
 import { addFormatterIgnores } from './formatter-ignores.js';
 import { HOOK_PATHS, writeHooks } from './hooks.js';
-import * as lockfile from './lockfile.js';
 import { MANAGED_PATHS, writeManagedFiles } from './managed-files.js';
 import { matchName } from './match.js';
+import * as packageManager from './package-manager.js';
 import { validateSettings } from './repo-settings.js';
 import { resolveBundles, sourceRepo } from './resolve.js';
 import { ownSkills, selfSource } from './self-source.js';
@@ -139,7 +139,7 @@ export function sync({
   snapshot: { dir, release },
   skills = skillsCli,
   repo = null,
-  refreshLock = lockfile.refreshLock,
+  refreshLock = packageManager.refreshLock,
 }) {
   const bundlesDir = join(dir, 'bundles');
   const config = skillyFile.read(cwd);
@@ -202,8 +202,9 @@ export function sync({
   for (const bundle of wanted.bundles) updateRules(cwd, bundle, join(bundlesDir, bundle));
 
   const hash = writeEngine(cwd, join(dir, 'engine'));
-  writeManagedFiles(cwd, join(dir, 'engine', 'templates'), config.tier);
+  // The hooks pin pnpm in package.json first: the workflows render from the final one.
   writeHooks(cwd, { bundles: wanted.bundles, bundlesDir, refreshLock });
+  writeManagedFiles(cwd, join(dir, 'engine', 'templates'), config.tier);
   addFormatterIgnores(cwd);
   skillyFile.write(cwd, { ...config, hub: release ?? config.hub });
 

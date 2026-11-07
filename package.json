@@ -37,7 +37,7 @@
     "build": "tsup",
     "typecheck": "tsc --noEmit",
     "test": "vitest run",
-    "prepare": "lefthook install --reset-hooks-path"
+    "prepare": "(test ! -e .git || ! command -v lefthook >/dev/null || lefthook install --reset-hooks-path)"
   },
   "devDependencies": {
     "@types/node": "^22.10.0",

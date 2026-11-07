@@ -78,7 +78,9 @@ export function ignoreTemp(cwd) {
 
 // Local commands clone the Hub at a Release with the person's gh login
 // (ADR-0008 decision 15). Returns null when that login can read the Hub, else
-// the command that invites it as a read collaborator.
+// the command that invites it as a collaborator. A personal repo has no read
+// role, so GitHub refuses a permission field. The Hub rulesets block the
+// collaborator's pushes to branches and tags.
 export function hubInvite(gh) {
   const permissions = (() => {
     try {
@@ -89,7 +91,7 @@ export function hubInvite(gh) {
   })();
   if (permissions?.pull) return null;
   const { login } = JSON.parse(gh(['api', 'user']));
-  return `gh api -X PUT repos/${HUB_REPO}/collaborators/${login} -f permission=pull`;
+  return `gh api -X PUT repos/${HUB_REPO}/collaborators/${login}`;
 }
 
 // The files Setup adds next to the Sync, on the setup branch in `tree`: the

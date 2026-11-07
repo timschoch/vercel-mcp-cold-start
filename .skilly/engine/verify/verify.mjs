@@ -22,6 +22,9 @@
 // `changedOnly` on a stage skips a step with `paths` when none of them changed against the
 // default branch, patterns as in changed-files.mjs. A step without `paths` always runs.
 //
+// A step with `script` and no `run` runs that package.json script with the package manager CI
+// installs with (package-manager.js), and is skipped when package.json has no such script.
+//
 // A budget warns and never fails. A gate that fails on slowness teaches you to bypass the gate,
 // and the bypass outlives the slowness. `budgetTicket` in the config says where a stage that has
 // outgrown its budget gets split.
@@ -39,6 +42,7 @@ import { spawnSync } from 'node:child_process';
 import { existsSync, readFileSync, writeFileSync } from 'node:fs';
 import { dirname, join, relative, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { detectPackageManager } from '../lib/package-manager.js';
 import { bundleSteps, findBundlesDir } from './bundle-steps.mjs';
 import { findMatch, listChangedFiles } from './changed-files.mjs';
 import { defaultBranch } from './default-branch.mjs';
@@ -147,16 +151,29 @@ const isPathChanged = (paths) => {
   return changedFiles === null || findMatch(paths, changedFiles) !== undefined;
 };
 
-// Read on the first step with `dependency`, once. A tool such as vitest needs no config file, so
-// the package.json entry is what says the repo has it.
-let declaredPackages;
+// Read on the first step with `dependency` or `script`, once.
+let packageJson;
+const readPackageJson = () => {
+  const packagePath = join(root, 'package.json');
+  packageJson ??= existsSync(packagePath) ? readJson(packagePath, 'package.json') : {};
+  return packageJson;
+};
+// A tool such as vitest needs no config file, so the package.json entry is what says the repo has it.
 const hasDependency = (name) => {
-  if (declaredPackages === undefined) {
-    const packagePath = join(root, 'package.json');
-    const { dependencies, devDependencies } = existsSync(packagePath) ? readJson(packagePath, 'package.json') : {};
-    declaredPackages = { ...dependencies, ...devDependencies };
+  const { dependencies, devDependencies } = readPackageJson();
+  return Object.hasOwn({ ...dependencies, ...devDependencies }, name);
+};
+const hasScript = (name) => Object.hasOwn(readPackageJson().scripts ?? {}, name);
+
+// The package manager CI installs with, found on the first `script` step that runs.
+let packageManager;
+const scriptCommand = (script) => {
+  try {
+    packageManager ??= detectPackageManager(root, readPackageJson());
+  } catch (error) {
+    return fail(`${error.message}, so the script steps cannot run.`);
   }
-  return Object.hasOwn(declaredPackages, name);
+  return packageManager.scriptCommand(script);
 };
 
 if (stage.tier !== undefined) validateTier(stage.tier, `stage ${stageName}`);
@@ -182,6 +199,15 @@ if (stageBlocked) {
     }
     if (stage.changedOnly && step.paths !== undefined && !isPathChanged(step.paths)) {
       skipped.push({ name: step.name, reason: 'none of its paths changed' });
+      continue;
+    }
+    // A `run` wins: the repo replaced the command, so `script` no longer says what runs.
+    if (step.script !== undefined && step.run === undefined) {
+      if (!hasScript(step.script)) {
+        skipped.push({ name: step.name, reason: `no ${step.script} script in package.json` });
+        continue;
+      }
+      runnable.push({ ...step, run: scriptCommand(step.script) });
       continue;
     }
     runnable.push(step);

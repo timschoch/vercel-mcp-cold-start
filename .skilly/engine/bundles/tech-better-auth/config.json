@@ -1,7 +1,6 @@
 {
   "detect": { "dependencies": ["better-auth"] },
   "includes": [],
-  "rules": [],
   "sources": [
     {
       "source": "better-auth/skills",
