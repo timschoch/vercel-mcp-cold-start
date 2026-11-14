@@ -1,10 +1,16 @@
 # Managed by skilly. The Sync writes this file from the Engine and overwrites
 # a hand edit. Change .skilly/verify.json or the tier in .skilly/config.json.
 #
-# On-demand review, tool tier and up: a /ai-review comment runs the repo's own
-# code-review skill on the runner. Never automatic on push: most PRs here are
-# Sync PRs, and a review of those is waste. Billed to the OAuth subscription in
-# the CLAUDE_CODE_OAUTH_TOKEN secret.
+# On-demand review, tool tier and up: a /ai-review comment on a PR runs the
+# repo's own code-review skill on the runner. Never automatic on push: most PRs
+# here are Sync PRs, and a review of those is waste. Billed to the OAuth
+# subscription in the CLAUDE_CODE_OAUTH_TOKEN secret. Needs the Claude GitHub
+# App on the repo: https://github.com/apps/claude
+#
+# track_progress runs the action in tag mode, also with a prompt: it checks out
+# the PR head, and its tracking comment shows the result or the error. Without
+# it a comment with a prompt runs agent mode on the default branch, with no
+# comment, so a review that stops early stays silent.
 name: AI review
 
 on:
@@ -22,20 +28,62 @@ permissions:
 jobs:
   ai-review:
     # Cheap gate before the checkout: the action itself re-checks trigger_phrase.
-    if: contains(github.event.comment.body, '/ai-review')
+    # An issue comment on a plain issue has no PR to review.
+    if: (github.event.issue.pull_request || github.event.pull_request) && contains(github.event.comment.body, '/ai-review')
     runs-on: ubuntu-latest
     timeout-minutes: 20
     steps:
+      # Full history: git diff origin/<base>...HEAD needs the merge base.
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
-      - uses: anthropics/claude-code-action@aa8a7738e48bf30a40ee499ce818bef081c5ab5e # v1.0.257
+        with:
+          fetch-depth: 0
+      - id: review
+        uses: anthropics/claude-code-action@aa8a7738e48bf30a40ee499ce818bef081c5ab5e # v1.0.257
         with:
           claude_code_oauth_token: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
           trigger_phrase: '/ai-review'
+          track_progress: true
+          # Tag mode reads the trigger comment as the only instruction; these custom
+          # instructions say what /ai-review asks for.
           prompt: |
-            Review this pull request by running the repo's own code-review skill:
-            read .agents/skills/code-review/SKILL.md and follow it.
+            The trigger comment /ai-review asks for this review, exactly as below.
+            Review pull request #${{ github.event.issue.number || github.event.pull_request.number }}
+            by running the repo's own code-review skill: read
+            .agents/skills/code-review/SKILL.md and follow every step of it, no shortcut:
+            read every standards source of step 3, and spawn both sub-agents of step 4.
+            This review only reads: run no build, test or install. Nobody answers questions here:
+            - The fixed point is origin/<base branch of the PR>. You are on the PR head.
+            - The spec is the issue the PR body or its commits close. None found: skip the Spec axis.
             Post each finding as an inline comment via
             mcp__github_inline_comment__create_inline_comment with confirmed: true.
-            Do not approve, do not request changes, do not push commits. Report only.
+            Put the Standards and Spec reports in your tracking comment, "no findings" included.
+            Stopped before the end: say why in the tracking comment.
+            Do not edit files, approve, request changes or push commits. Report only.
           # No --bare: it skips the skills and the CLAUDE.md this review reads.
-          claude_args: '--allowedTools "mcp__github_inline_comment__create_inline_comment,Bash(gh pr:*),Read,Grep,Glob"'
+          # Tag mode adds Read, Grep, Glob and its git write tools. The deny list wins: no
+          # edit and no commit, so its push has nothing to push.
+          # Opus: on the action's default model the review skipped steps 3 and 4.
+          claude_args: >-
+            --model opus
+            --allowedTools "mcp__github_inline_comment__create_inline_comment,Bash(gh pr:*),Bash(gh issue view:*),Bash(git diff:*),Bash(git log:*),Bash(git rev-parse:*),Bash(git show:*),Agent"
+            --disallowedTools "Edit,MultiEdit,Write,NotebookEdit,Bash(git add:*),Bash(git commit:*),Bash(git rm:*)"
+      # The action logs only how many tool calls it denied. Name them, so a tool the
+      # review needs shows up. Tool inputs can hold file content and secrets, so a Bash
+      # call keeps only its program and a bare subcommand: Bash(cargo test), Bash(cat).
+      - name: Name the denied tool calls
+        if: always() && steps.review.outputs.execution_file
+        # pipefail: an unreadable file turns the step red, not into "no denied tool calls".
+        shell: bash
+        env:
+          EXECUTION_FILE: ${{ steps.review.outputs.execution_file }}
+        run: |
+          denied=$(jq -r '.[] | select(.type == "result") | .permission_denials[]?
+            | if .tool_name == "Bash"
+              then "Bash(\(.tool_input.command // "" | split("\n")[0] | split(" ")
+                | map(select(length > 0 and (test("^[A-Za-z_][A-Za-z0-9_]*=") | not)))
+                | [.[0]] + (.[1:2] | map(select(test("^[a-z][a-z-]*$")))) | join(" ")))"
+              else .tool_name end' "$EXECUTION_FILE" | sort | uniq -c)
+          if [ -z "$denied" ]; then echo 'no denied tool calls'; exit 0; fi
+          echo "$denied"
+          echo "::warning title=Denied tool calls::$(echo "$denied" | tr -s '\n ' ' ')"
+          printf '### Denied tool calls\n\n```\n%s\n```\n' "$denied" >> "$GITHUB_STEP_SUMMARY"

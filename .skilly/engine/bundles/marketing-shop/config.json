@@ -1,6 +1,5 @@
 {
   "includes": ["marketing"],
-  "rules": [],
   "sources": [
     {
       "source": "coreyhaines31/marketingskills",

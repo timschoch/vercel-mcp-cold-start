@@ -9,6 +9,7 @@ import { runVerb } from '../lib/add-remove.js';
 import { deliver, startSync } from '../lib/delivery.js';
 import { applySettings, validateSettings } from '../lib/repo-settings.js';
 import { selfSource } from '../lib/self-source.js';
+import * as skillyFile from '../lib/skilly-file.js';
 
 const USAGE =
   'usage: node .skilly/engine/bin/skilly.js add|remove <bundle-or-skill...> | sync | settings [--apply] [owner/repo]';
@@ -40,7 +41,8 @@ function runSettings(options) {
   const shouldApply = options.includes('--apply');
   const repo = options.find((option) => option !== '--apply') ?? selfSource(cwd);
   if (!repo) throw new Error('no GitHub origin here — name the repo: settings [--apply] owner/repo');
-  const { drift, unavailable } = shouldApply ? applySettings(repo) : validateSettings(repo);
+  const tier = skillyFile.exists(cwd) ? skillyFile.read(cwd).tier : undefined;
+  const { drift, unavailable } = shouldApply ? applySettings(repo, tier) : validateSettings(repo, tier);
   const label = shouldApply ? 'set' : 'drift';
   for (const { setting, want, have } of drift) {
     console.log(`${label}: ${setting}: ${JSON.stringify(have)} -> ${JSON.stringify(want)}`);

@@ -1,7 +1,6 @@
 {
   "detect": { "dependencies": ["posthog-js", "posthog-node"] },
   "includes": [],
-  "rules": [],
   "sources": [
     {
       "source": "https://github.com/PostHog/skills/tree/main/skills/posthog/all",

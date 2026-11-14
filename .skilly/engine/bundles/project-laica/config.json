@@ -10,7 +10,6 @@
     "tech-posthog",
     "tech-shadcn"
   ],
-  "rules": [],
   "sources": [
     {
       "source": "admin-laicadev/laica-launcher",

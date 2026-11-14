@@ -1,7 +1,6 @@
 {
   "detect": { "dependencies": ["n8n", "n8n-workflow"] },
   "includes": [],
-  "rules": [],
   "sources": [
     {
       "source": "n8n-io/skills",

@@ -1,7 +1,6 @@
 {
   "detect": { "files": ["components.json"] },
   "includes": [],
-  "rules": [],
   "sources": [
     {
       "source": "shadcn-ui/ui",
