@@ -13,7 +13,6 @@
     "tech-vercel",
     "tech-langfuse"
   ],
-  "rules": [],
   "sources": [
     {
       "source": "Habits-Family/habits",

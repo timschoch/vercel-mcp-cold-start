@@ -6,7 +6,8 @@ import { run } from './run.js';
 // report. Every GitHub call goes through `gh`.
 export const RULESET_NAME = 'protect-trunk';
 // ci.yml's job, and the commit status a workflow_dispatch run writes for the
-// release PR (ADR-0009 decision 11). Required on every tier, sandbox included.
+// release PR (ADR-0009 decision 11). Required on every tier from sandbox up. The config tier
+// has no ci.yml, so its ruleset keeps the trunk protection and drops the required check.
 export const REQUIRED_CHECK = 'verify';
 
 const RULESET = {
@@ -28,6 +29,9 @@ const RULESET = {
   ],
 };
 const RULE_TYPES = new Set(RULESET.rules.map(({ type }) => type));
+
+const rulesetFor = (tier) =>
+  tier === 'config' ? { ...RULESET, rules: RULESET.rules.filter(({ type }) => type !== 'required_status_checks') } : RULESET;
 
 // One `gh api` call. A body goes in on stdin; an empty answer (204) is null.
 function callApi(path, { method = 'GET', body } = {}) {
@@ -75,7 +79,7 @@ const repoField = (name, want) => ({
   write: (repo) => callApi(`repos/${repo}`, { method: 'PATCH', body: { [name]: want } }),
 });
 
-const SETTINGS = [
+const settingsFor = (tier) => [
   repoField('allow_auto_merge', true),
   repoField('allow_squash_merge', true),
   // git-shortcuts merges epic branches with a merge commit.
@@ -108,15 +112,16 @@ const SETTINGS = [
   },
   {
     name: `ruleset ${RULESET_NAME}`,
-    want: ownedPart(RULESET),
+    want: ownedPart(rulesetFor(tier)),
     read: (repo, get) => ownedPart(findRuleset(repo, get)),
     write(repo, get) {
+      const ruleset = rulesetFor(tier);
       const current = findRuleset(repo, get);
-      if (!current) return callApi(`repos/${repo}/rulesets`, { method: 'POST', body: RULESET });
+      if (!current) return callApi(`repos/${repo}/rulesets`, { method: 'POST', body: ruleset });
       const ownerRules = current.rules.filter(({ type }) => !RULE_TYPES.has(type));
       return callApi(`repos/${repo}/rulesets/${current.id}`, {
         method: 'PUT',
-        body: { ...RULESET, rules: [...RULESET.rules, ...ownerRules] },
+        body: { ...ruleset, rules: [...ruleset.rules, ...ownerRules] },
       });
     },
   },
@@ -126,7 +131,7 @@ const SETTINGS = [
 // the wanted and the actual value. unavailable: the settings gh could not
 // read or set, such as a 403 for a login without admin rights or a plan
 // without rulesets. One unavailable setting never stops the others.
-function settle(repo, shouldWrite) {
+function settle(repo, tier, shouldWrite) {
   const answers = new Map();
   const get = (path) => {
     if (!answers.has(path)) {
@@ -142,7 +147,7 @@ function settle(repo, shouldWrite) {
   };
   const drift = [];
   const unavailable = [];
-  for (const setting of SETTINGS) {
+  for (const setting of settingsFor(tier)) {
     try {
       const have = setting.read(repo, get);
       if (canonical(have) === canonical(setting.want)) continue;
@@ -155,9 +160,9 @@ function settle(repo, shouldWrite) {
   return { drift, unavailable };
 }
 
-// Reads every setting of "owner/repo" and writes none.
-export const validateSettings = (repo) => settle(repo, false);
+// Reads every setting of "owner/repo" for `tier` and writes none.
+export const validateSettings = (repo, tier) => settle(repo, tier, false);
 
-// Sets each setting that drifts. drift lists what it set, so a second run
-// returns an empty drift.
-export const applySettings = (repo) => settle(repo, true);
+// Sets each setting that drifts for `tier`. drift lists what it set, so a
+// second run returns an empty drift.
+export const applySettings = (repo, tier) => settle(repo, tier, true);

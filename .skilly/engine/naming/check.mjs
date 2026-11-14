@@ -1,14 +1,13 @@
 #!/usr/bin/env node
 // Rule `naming`: the machine-checkable half of the naming Rule, over the files
 // a PR changes. The workflow Bundle adds it as the `naming` verify step, so a
-// consumer runs it from `.skilly/engine/naming/` on push and in CI. The hub's
-// `rules/naming.sh` runs it in the gate too.
+// consumer runs it from `.skilly/engine/naming/` on push and in CI.
 //   node check.mjs [files...]   no files: every file the branch adds or changes
 //                               over its base branch
 // Regex-only, on comment- and string-blanked source — the
-// gate runs in a consumer checkout that installs nothing, so there is no parser
-// to lean on. Every check stays conservative: a missed bad name costs less than
-// a false FAIL, which teaches people to ignore the gate.
+// Engine ships no dependencies, so there is no parser to lean on. Every check
+// stays conservative: a missed bad name costs less than a false FAIL, which
+// teaches people to ignore the check.
 // Every word list — short words, noise words, verb synonyms, env roles, the
 // discriminant key and the allow entries, vendored paths included — lives in
 // the naming skill's `references/naming.json`, merged with stack files and the
