@@ -1,7 +1,6 @@
 {
   "detect": { "dependencies": ["vercel", "@vercel/*"], "files": ["vercel.json"] },
   "includes": [],
-  "rules": [],
   "sources": [
     {
       "source": "timschoch/skilly",

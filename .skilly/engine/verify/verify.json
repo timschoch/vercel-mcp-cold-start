@@ -31,7 +31,7 @@
           "target": ".agents/skills/writing-rules/scripts/check-mermaid.mjs",
           "why": "A broken mermaid diagram renders as an error box on GitHub and in chat. Setup: the writing-rules skill's Mermaid check."
         },
-        { "name": "typecheck", "run": "npm run --if-present typecheck" },
+        { "name": "typecheck", "script": "typecheck" },
         {
           "name": "unit (changed)",
           "run": "node .skilly/engine/verify/run-changed-tests.mjs origin/$DEFAULT_BRANCH npx vitest run --passWithNoTests",
@@ -44,7 +44,7 @@
       "extends": "push",
       "budgetSeconds": 300,
       "steps": [
-        { "name": "lint", "run": "npm run --if-present lint" },
+        { "name": "lint", "script": "lint" },
         {
           "name": "unit",
           "run": "npx vitest run --passWithNoTests",
@@ -52,7 +52,7 @@
           "replaces": "unit (changed)",
           "why": "The full suite holds the changed tests, so it replaces that step and each test runs one time."
         },
-        { "name": "build", "run": "npm run --if-present build" },
+        { "name": "build", "script": "build" },
         {
           "name": "audit",
           "run": "node .skilly/engine/verify/audit.mjs",

@@ -78,7 +78,9 @@ export function ignoreTemp(cwd) {
 
 // Local commands clone the Hub at a Release with the person's gh login
 // (ADR-0008 decision 15). Returns null when that login can read the Hub, else
-// the command that invites it as a read collaborator.
+// the command that invites it as a collaborator. A personal repo has no read
+// role, so GitHub refuses a permission field. The Hub rulesets block the
+// collaborator's pushes to branches and tags.
 export function hubInvite(gh) {
   const permissions = (() => {
     try {
@@ -89,7 +91,7 @@ export function hubInvite(gh) {
   })();
   if (permissions?.pull) return null;
   const { login } = JSON.parse(gh(['api', 'user']));
-  return `gh api -X PUT repos/${HUB_REPO}/collaborators/${login} -f permission=pull`;
+  return `gh api -X PUT repos/${HUB_REPO}/collaborators/${login}`;
 }
 
 // The files Setup adds next to the Sync, on the setup branch in `tree`: the
@@ -111,7 +113,7 @@ function prepareTree(tree, config) {
 // is already gone.
 const setupBody = (report) =>
   [
-    `Sets up skilly at Release ${report.release.after}. A person merges it once \`ci / verify\` is green.`,
+    `Sets up skilly at Release ${report.release.after}. A person merges it once its checks are green.`,
     ...reportSections({ ...report, settings: null }),
     '',
   ].join('\n');
@@ -186,7 +188,7 @@ export function setup({
 
   // Settings last: the ruleset requires `verify`, and only the Setup PR brings
   // the ci.yml that reports it. A failed Sync leaves the default branch open.
-  const settings = applySettings(repo);
+  const settings = applySettings(repo, config.tier);
   for (const { setting, want } of settings.drift) log(`set ${setting}: ${JSON.stringify(want)}`);
   for (const { setting, reason } of settings.unavailable) log(`unavailable: ${setting}: ${reason}`);
   return { invite, settings, report, pr };

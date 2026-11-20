@@ -2,7 +2,6 @@
   "includes": [
     "tech-lemy"
   ],
-  "rules": [],
   "sources": [
     {
       "source": "timschoch/lemy",

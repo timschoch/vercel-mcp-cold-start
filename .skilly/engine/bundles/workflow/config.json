@@ -1,7 +1,6 @@
 {
   "detect": { "always": true },
   "includes": [],
-  "rules": ["conventional-commits", "naming"],
   "hooks": {
     "lefthook": {
       "pre-commit": {

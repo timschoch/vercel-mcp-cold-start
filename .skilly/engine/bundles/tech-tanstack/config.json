@@ -1,7 +1,6 @@
 {
   "detect": { "dependencies": ["@tanstack/react-router", "@tanstack/react-start", "@tanstack/router-*", "@tanstack/start-*"] },
   "includes": [],
-  "rules": [],
   "sources": [
     {
       "source": "https://github.com/TanStack/router/tree/main/packages/router-core/skills",

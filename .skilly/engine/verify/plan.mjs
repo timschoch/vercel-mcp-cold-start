@@ -11,8 +11,11 @@ import { existsSync, readdirSync, readFileSync, realpathSync } from 'node:fs';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
-// The toolchains the Managed workflows know how to install and cache.
-export const TOOLCHAINS = ['playwright'];
+// The command word of each toolchain the Managed workflows know how to install. A path or a file
+// that holds the word, like `playwright.config.ts` or `bun.lock`, is no call.
+const TOOLCHAIN_WORDS = { bun: /(?<![\w./-])bunx?(?![\w./-])/, playwright: /(?<![\w./-])playwright(?![\w./-])/ };
+export const TOOLCHAINS = Object.keys(TOOLCHAIN_WORDS);
+const SCRIPT_CALL = /\b(?:npm|pnpm|yarn)\s+(?:(?:run|-[\w-]+)\s+)*([\w:.-]+)/g;
 const DAY_MS = 86_400_000;
 // A change on main older than this, with no finished night since, means the nightly is stuck.
 const STUCK_AFTER_DAYS = 2;
@@ -39,19 +42,38 @@ export function pickNightlyStage({ event, lastCommitAt, lastFinishedAt, now }) {
   return now - lastCommitAt <= STUCK_AFTER_DAYS * DAY_MS ? 'nightly' : 'stop';
 }
 
-/** The toolchains of `steps`, each once, sorted. Throws on one the Managed workflows lack. */
-export function listToolchains(steps) {
+// `command`, with the text of every package.json script it calls, directly or through another script.
+function withCalledScripts(command, scripts, seen = new Set()) {
+  const called = [...command.matchAll(SCRIPT_CALL)].map(([, script]) => script);
+  const texts = called
+    .filter((script) => Object.hasOwn(scripts, script) && !seen.has(script))
+    .map((script) => {
+      seen.add(script);
+      return withCalledScripts(scripts[script], scripts, seen);
+    });
+  return [command, ...texts].join('\n');
+}
+
+/**
+ * The toolchains of `steps`, each once, sorted: the ones a step declares, and the ones its command
+ * or a package.json script it calls names. Throws on a declared one the Managed workflows lack.
+ */
+export function listToolchains(steps, scripts = {}) {
   const toolchains = new Set();
-  for (const { name, toolchain = [] } of steps) {
+  for (const { name, run = '', toolchain = [] } of steps) {
     for (const needed of toolchain) {
       if (!TOOLCHAINS.includes(needed)) {
         throw new Error(`step ${name} needs toolchain ${needed}, the Engine installs ${TOOLCHAINS.join(', ')}`);
       }
       toolchains.add(needed);
     }
+    const text = withCalledScripts(run, scripts);
+    for (const [found, word] of Object.entries(TOOLCHAIN_WORDS)) if (word.test(text)) toolchains.add(found);
   }
   return [...toolchains].sort();
 }
+
+const readScripts = () => (existsSync('package.json') ? (JSON.parse(readFileSync('package.json', 'utf8')).scripts ?? {}) : {});
 
 const gh = (...args) => execFileSync('gh', args, { encoding: 'utf8' });
 
@@ -125,7 +147,7 @@ const plan = (kind) => {
 if (process.argv[1] && realpathSync(process.argv[1]) === fileURLToPath(import.meta.url)) {
   try {
     const stage = plan(process.argv[2]);
-    const toolchains = stage === 'stop' ? [] : listToolchains(resolvedSteps(stage));
+    const toolchains = stage === 'stop' ? [] : listToolchains(resolvedSteps(stage), readScripts());
     process.stdout.write(`stage=${stage}\ntoolchains=${JSON.stringify(toolchains)}\n`);
   } catch (error) {
     console.error(`plan: ${error.message}`);

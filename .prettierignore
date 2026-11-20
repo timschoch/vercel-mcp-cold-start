@@ -7,3 +7,9 @@ skills-lock.json
 
 # skilly-owned files
 .skilly
+
+# skilly-owned files
+package-lock.json
+pnpm-lock.yaml
+yarn.lock
+.github/workflows/ci.yml

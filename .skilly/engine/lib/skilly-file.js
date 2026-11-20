@@ -6,7 +6,8 @@ import { dirname, join } from 'node:path';
 // Siblings in .skilly/ (verify.json, naming.json) belong to other skills.
 export const CONFIG_PATH = join('.skilly', 'config.json');
 const LEGACY_PATH = '.skilly.json';
-export const TIERS = ['sandbox', 'tool', 'product'];
+// `config` holds skills, rules and configs only: no Managed files, no git hooks, no required check.
+export const TIERS = ['config', 'sandbox', 'tool', 'product'];
 // The Release a Consumer runs: a Hub tag from release-please, written with its
 // "v" by .github/workflows/release.yml. Optional: a config without it loads.
 const RELEASE_TAG = /^v\d+\.\d+\.\d+$/;
