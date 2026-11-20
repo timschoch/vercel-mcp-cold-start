@@ -1,6 +1,5 @@
 {
   "includes": [],
-  "rules": [],
   "hooks": {
     "claude": {
       "PreToolUse": [

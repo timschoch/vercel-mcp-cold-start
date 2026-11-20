@@ -1,6 +1,7 @@
 import { existsSync, mkdirSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
 import { dirname, join } from 'node:path';
 import { HUB_REPO } from './constants.js';
+import { detectPackageManager, readPackageJson } from './package-manager.js';
 import { tryRun } from './run.js';
 import { selfSource } from './self-source.js';
 import { TIERS } from './skilly-file.js';
@@ -20,30 +21,6 @@ export const MANAGED_PATHS = MANAGED_FILES.map(({ path }) => path);
 // The first line of every template. Only a file with it is the Sync's to delete.
 const HEADER = '# Managed by skilly.';
 const STEP_INDENT = '      ';
-
-const PACKAGE_MANAGERS = {
-  npm: { lockfile: 'package-lock.json', install: 'npm ci', exec: 'npx' },
-  pnpm: { lockfile: 'pnpm-lock.yaml', install: 'pnpm install --frozen-lockfile', exec: 'pnpm exec' },
-};
-// Lockfiles of the package managers without a template, so the Sync names them.
-const OTHER_LOCKFILES = { 'yarn.lock': 'yarn', 'bun.lock': 'bun', 'bun.lockb': 'bun' };
-
-const readPackageJson = (cwd) => {
-  const path = join(cwd, 'package.json');
-  return existsSync(path) ? JSON.parse(readFileSync(path, 'utf8')) : {};
-};
-
-// `packageManager` in package.json names it. Without one, the lockfile does; without both, npm.
-export function detectPackageManager(cwd, packageJson = readPackageJson(cwd)) {
-  const named = packageJson.packageManager?.split('@')[0];
-  const found =
-    named ??
-    Object.entries(PACKAGE_MANAGERS).find(([, { lockfile }]) => existsSync(join(cwd, lockfile)))?.[0] ??
-    Object.entries(OTHER_LOCKFILES).find(([lockfile]) => existsSync(join(cwd, lockfile)))?.[1] ??
-    'npm';
-  if (!PACKAGE_MANAGERS[found]) throw new Error(`no Managed workflow for ${found}: the Engine knows npm and pnpm`);
-  return found;
-}
 
 // The Managed file is written for the checkout, so the running repo's env does not count: the
 // Hub nightly syncs a Consumer from the Hub's own Actions run. origin/HEAD comes from the clone.
@@ -84,15 +61,26 @@ const render = (template, values) =>
 
 const isForTier = (file, tier) => TIERS.indexOf(tier) >= TIERS.indexOf(file.tier);
 
+// The Managed files the Sync owns at `tier`. A keepsOwn file can be the Consumer's at any tier.
+export const listSyncOwnedPaths = (tier) =>
+  MANAGED_FILES.filter((file) => isForTier(file, tier) && !file.keepsOwn).map(({ path }) => path);
+
 // The repo secrets the Managed files of `tier` read. Every run has GITHUB_TOKEN.
 export function listManagedSecrets(templatesDir, tier) {
   const names = new Set();
-  for (const file of MANAGED_FILES.filter((item) => isForTier(item, tier))) {
-    const template = readFileSync(join(templatesDir, file.template), 'utf8');
+  for (const template of listTierTemplates(templatesDir, tier))
     for (const [, name] of template.matchAll(/\bsecrets\.(\w+)/g)) if (name !== 'GITHUB_TOKEN') names.add(name);
-  }
   return [...names].sort();
 }
+
+// claude-code-action trades an OIDC token for a token of the Claude GitHub App, so the App must be on the repo.
+export const hasClaudeCodeAction = (templatesDir, tier) =>
+  listTierTemplates(templatesDir, tier).some((template) => /uses: anthropics\/claude-code-action@/.test(template));
+
+const listTierTemplates = (templatesDir, tier) =>
+  MANAGED_FILES.filter((file) => isForTier(file, tier)).map((file) =>
+    readFileSync(join(templatesDir, file.template), 'utf8'),
+  );
 
 /**
  * Writes the Managed files of `tier` into `cwd` from `templatesDir`, and deletes the ones the
@@ -102,10 +90,12 @@ export function listManagedSecrets(templatesDir, tier) {
 export function writeManagedFiles(cwd, templatesDir, tier = 'sandbox') {
   if (selfSource(cwd)?.toLowerCase() === HUB_REPO) return false;
   if (!TIERS.includes(tier)) throw new Error(`unknown tier ${JSON.stringify(tier)}, tiers are ${TIERS.join(', ')}`);
-  const packageJson = readPackageJson(cwd);
-  const name = detectPackageManager(cwd, packageJson);
+  const packageJson = readPackageJson(cwd) ?? {};
+  const { name, lockfile, install, exec } = detectPackageManager(cwd, packageJson);
   const values = {
-    ...PACKAGE_MANAGERS[name],
+    lockfile,
+    install,
+    exec,
     setupNode: setupNodeSteps(cwd, templatesDir, name, packageJson),
     defaultBranch: findDefaultBranch(cwd),
     releaseType: existsSync(join(cwd, 'package.json')) ? 'node' : 'simple',

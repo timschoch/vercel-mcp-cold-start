@@ -22,7 +22,7 @@ const major = (release) => release?.match(/^v(\d+)\./)?.[1];
 export function autoMerge({ release, skills, bundles }) {
   if (skills.removed.length || bundles.removed.length) return { on: false, reason: 'the Sync removes skills or Bundles' };
   if (major(release.after) !== major(release.before)) return { on: false, reason: 'new major Release' };
-  return { on: true, reason: 'merges when `ci / verify` is green' };
+  return { on: true, reason: 'merges when its checks are green' };
 }
 
 // The sections of a PR body that list what the Sync did. The Sync PR and the

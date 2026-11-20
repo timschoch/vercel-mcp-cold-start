@@ -92,7 +92,7 @@ A step needs `name`, `stage` and `run`. The other step fields work as in the def
 | Field | Effect |
 | --- | --- |
 | `"paths": ["src/", "*.css"]` | in a stage with `changedOnly`, runs only when the diff to the default branch holds a match. Patterns as in [Changed tests](#changed-tests) |
-| `"toolchain": ["playwright"]` | CI installs and caches it before the stage runs. `plan.mjs` names the toolchains it knows |
+| `"toolchain": ["playwright"]` | CI installs it before the stage runs. `plan.mjs` names the toolchains it knows. It also finds one by name in the step's command and in the package.json scripts it calls, so such a step declares nothing |
 | `"issueLabels": ["nightly-tests"]` | in the nightly, a red step opens or updates one issue per first label |
 
 verify reads the Bundle configs from `.skilly/engine/bundles/`, or from `bundles/` in the Hub. With neither, it prints a note and runs without the Bundle steps.
@@ -103,7 +103,7 @@ verify reads the Bundle configs from `.skilly/engine/bundles/`, or from `bundles
 
 | Repo file | Effect |
 | --- | --- |
-| `{ "name": "lint", "run": "pnpm lint" }` | changes the default `lint` step, keeps its other fields |
+| `{ "name": "lint", "run": "tsc --noEmit" }` | changes the default `lint` step, keeps its other fields. A `run` wins over the step's `script` |
 | `"-lint"` | drops the default `lint` step |
 | `{ "name": "docs", "run": "…" }` | adds a step after the defaults |
 | `"budgetSeconds": 60` on a stage | replaces the default |
@@ -114,17 +114,19 @@ The file is optional. Check the result with `--config` or `<stage> --steps`.
 
 ## Tier
 
-`tier` in `.skilly/config.json`, default `sandbox`, order `sandbox` < `tool` < `product`. A step's `tier` is the minimum a repo needs to run it; below that the step is skipped. A stage's `tier` is that rule for the whole stage: below it nothing runs and the exit is 0. Tier sets the size of the net, not the standard.
+`tier` in `.skilly/config.json`, default `sandbox`, order `config` < `sandbox` < `tool` < `product`. A `config` repo has no git hooks and no CI: only the agent push hook calls `verify push` there, and its steps above `config` skip. A step's `tier` is the minimum a repo needs to run it; below that the step is skipped. A stage's `tier` is that rule for the whole stage: below it nothing runs and the exit is 0. Tier sets the size of the net, not the standard.
 
 ## Target
 
 A step's `target` is a path relative to the repo root; missing, the step is skipped. That is how one stage list fits repos that do not all have an `e2e/` or a Dockerfile.
 
+A step's `script` is a package.json script name, in place of `run`; missing from `scripts` in the root `package.json`, the step is skipped. verify runs it with the package manager CI installs with, picked by `.skilly/engine/lib/package-manager.js` (Hub: `engine/lib/`). typecheck, lint and build are such steps.
+
 A step's `dependency` is a package name; not in `dependencies` or `devDependencies` of the root `package.json`, the step is skipped. The unit steps use `"dependency": "vitest"`: vitest runs with no config file, and its config has many names. Vitest only in a workspace `package.json`: set `"dependency": null` on the unit steps in `.skilly/verify.json`.
 
 ## Audit
 
-The `audit` step ([scripts/audit.mjs](scripts/audit.mjs)) fails on every high or critical advisory. It runs `yarn audit` (yarn 1) when `yarn.lock` exists, else `npm audit`. An advisory with no patched version goes on the step's `accept` list in `.skilly/verify.json`:
+The `audit` step ([scripts/audit.mjs](scripts/audit.mjs)) fails on every high or critical advisory. It runs the audit of the package manager CI installs with: `pnpm audit`, `yarn audit` (yarn 1) or `npm audit`. An advisory with no patched version goes on the step's `accept` list in `.skilly/verify.json`:
 
 ```json
 { "stages": { "ci": { "steps": [{ "name": "audit", "accept": [{ "id": "GHSA-vfj7-8cjw-p6xm", "why": "braces, no fix, dev only" }] }] } } }

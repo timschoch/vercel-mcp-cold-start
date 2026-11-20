@@ -1,0 +1,6 @@
+{
+  "includes": [],
+  "mcp": {
+    "folk": { "type": "http", "url": "https://mcp.folk.app/mcp" }
+  }
+}

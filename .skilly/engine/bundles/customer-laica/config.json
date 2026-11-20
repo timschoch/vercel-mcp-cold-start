@@ -1,0 +1,12 @@
+{
+  "includes": [],
+  "mcp": {
+    "laica-files": { "type": "http", "url": "https://files.laica.dev/apps/mcp/" }
+  },
+  "sources": [
+    {
+      "source": "github/awesome-copilot",
+      "skills": ["excalidraw-diagram-generator"]
+    }
+  ]
+}

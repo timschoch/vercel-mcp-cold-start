@@ -1,7 +1,6 @@
 {
   "detect": { "dependencies": ["typescript"], "files": ["tsconfig.json"] },
   "includes": [],
-  "rules": [],
   "sources": [
     {
       "source": "cursor/plugins",

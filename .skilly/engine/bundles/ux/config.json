@@ -1,0 +1,29 @@
+{
+  "includes": [],
+  "tiers": ["product"],
+  "sources": [
+    {
+      "source": "ghaida/intent",
+      "skills": [
+        "articulate",
+        "blueprint",
+        "evaluate",
+        "fortify",
+        "include",
+        "intent",
+        "investigate",
+        "journey",
+        "localize",
+        "measure",
+        "organize",
+        "philosopher",
+        "present",
+        "specify",
+        "storytelling",
+        "strategize",
+        "transpose",
+        "wireframe"
+      ]
+    }
+  ]
+}

@@ -6,20 +6,28 @@
 // the API's anonymous rate limit.
 
 import { spawnSync } from 'node:child_process';
-import { existsSync, realpathSync } from 'node:fs';
+import { realpathSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
+import { detectPackageManager } from '../lib/package-manager.js';
 
 const BLOCKING_SEVERITIES = new Set(['high', 'critical']);
 const AUDIT_MAX_BUFFER_BYTES = 256 * 1024 * 1024;
 const RATE_LIMIT_STATUSES = new Set([403, 429]);
 
-// npm writes "<=3.0.3", GitHub "<= 3.0.3".
-const toRangeKey = (range) => range.replace(/\s/g, '');
+// npm and pnpm write ">=4.0.0 <=4.17.23", GitHub ">= 4.0.0, <= 4.17.23".
+const toRangeKey = (range) => range.replace(/[\s,]/g, '');
 
 const addFinding = (found, id, name, range) => {
   const finding = found.get(id) ?? { name, ranges: new Set() };
   finding.ranges.add(toRangeKey(range));
   found.set(id, finding);
+};
+
+// yarn 1 and pnpm print the same advisory object.
+const addAdvisory = (found, advisory) => {
+  if (BLOCKING_SEVERITIES.has(advisory.severity)) {
+    addFinding(found, advisory.github_advisory_id, advisory.module_name, advisory.vulnerable_versions);
+  }
 };
 
 /** High and critical advisories in `npm audit --json` output, as GHSA id → { name, ranges }. */
@@ -45,13 +53,22 @@ export const parseYarn = (output) => {
     if (!line.trim()) continue;
     const event = JSON.parse(line);
     if (event.type === 'error') throw new Error(event.data);
-    const advisory = event.type === 'auditAdvisory' ? event.data.advisory : null;
-    if (advisory && BLOCKING_SEVERITIES.has(advisory.severity)) {
-      addFinding(found, advisory.github_advisory_id, advisory.module_name, advisory.vulnerable_versions);
-    }
+    if (event.type === 'auditAdvisory') addAdvisory(found, event.data.advisory);
   }
   return found;
 };
+
+/** High and critical advisories in `pnpm audit --json` output (one npm 6 style report). */
+export const parsePnpm = (output) => {
+  const report = JSON.parse(output);
+  if (report.error) throw new Error(report.error.message ?? JSON.stringify(report.error));
+  const found = new Map();
+  for (const advisory of Object.values(report.advisories)) addAdvisory(found, advisory);
+  return found;
+};
+
+// Each package manager prints its own audit output.
+const PARSERS = { npm: parseNpm, pnpm: parsePnpm, yarn: parseYarn };
 
 /**
  * Checks the accept list against the audit. `found` maps GHSA id → { name, ranges }, `fixed`
@@ -97,15 +114,22 @@ const main = async () => {
   const accept = JSON.parse(process.env.VERIFY_STEP ?? '{}').accept ?? [];
   if (!Array.isArray(accept)) throw new Error('accept on the audit step must be an array.');
 
-  const yarn = existsSync('yarn.lock');
-  const result = spawnSync(yarn ? 'yarn' : 'npm', ['audit', '--json'], { encoding: 'utf8', maxBuffer: AUDIT_MAX_BUFFER_BYTES });
+  // The package manager CI installs with, so the audit reads the lockfile CI installs from.
+  let packageManager;
+  try {
+    packageManager = detectPackageManager(process.cwd()).name;
+  } catch (error) {
+    throw new Error(`${error.message}, so the audit cannot run.`);
+  }
+  const parse = PARSERS[packageManager];
+  const result = spawnSync(packageManager, ['audit', '--json'], { encoding: 'utf8', maxBuffer: AUDIT_MAX_BUFFER_BYTES });
   if (result.error) throw result.error;
   let found;
   try {
-    found = yarn ? parseYarn(result.stdout) : parseNpm(result.stdout);
+    found = parse(result.stdout);
   } catch (error) {
-    // yarn 2+ has no `yarn audit`; its usage error lands here.
-    throw new Error(`cannot read the ${yarn ? 'yarn' : 'npm'} audit output: ${error.message}\n${result.stderr}`);
+    // pnpm 12 writes its errors to stderr only.
+    throw new Error(`cannot read the ${packageManager} audit output: ${error.message}\n${result.stderr}`);
   }
 
   const fixed = new Set();

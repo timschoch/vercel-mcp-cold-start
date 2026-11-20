@@ -1,6 +1,5 @@
 {
   "includes": [],
-  "rules": [],
   "sources": [
     {
       "source": "https://github.com/twentyhq/twenty/tree/agent-skills",

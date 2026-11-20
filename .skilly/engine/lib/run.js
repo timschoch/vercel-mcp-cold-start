@@ -9,7 +9,7 @@ export function run(cmd, args, { cwd, input, env } = {}) {
     env: env ? { ...process.env, ...env } : undefined,
   });
   if (result.error) throw new Error(`failed to run ${cmd}: ${result.error.message}`);
-  if (result.status !== 0) throw new Error(`${cmd} ${args.join(' ')} failed: ${(result.stderr || '').trim()}`);
+  if (result.status !== 0) throw new Error(`${cmd} ${args.join(' ')} failed: ${(result.stderr || result.stdout || '').trim()}`);
   return result.stdout.trim();
 }
 
