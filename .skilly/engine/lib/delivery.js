@@ -1,9 +1,8 @@
-import { spawnSync } from 'node:child_process';
 import { mkdtempSync, rmSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { defaultBranch } from '../verify/default-branch.mjs';
-import { cloneRelease, latestRelease } from './add-remove.js';
+import { runSnapshotScript, withReleaseSnapshot } from './release-snapshot.js';
 import { run, tryRun } from './run.js';
 import { selfSource } from './self-source.js';
 import * as skillsCli from './skills-cli.js';
@@ -161,16 +160,8 @@ function tryGh(gh, args) {
 
 // `skilly sync`: fetch the newest Release and run its Engine's delivery. The
 // local Engine only starts it, so old Engine code never writes a newer Release.
-export function startSync({
-  cwd,
-  latestRelease: newest = latestRelease,
-  fetchSnapshot = cloneRelease,
-  runEngine = (bin, args) => spawnSync('node', [bin, ...args], { cwd, stdio: 'inherit' }).status ?? 1,
-}) {
-  const snapshot = fetchSnapshot(newest());
-  try {
-    return runEngine(join(snapshot.dir, 'engine', 'bin', 'skilly.js'), ['deliver', snapshot.dir, snapshot.release]);
-  } finally {
-    snapshot.cleanup();
-  }
+export function startSync({ cwd, withSnapshot = withReleaseSnapshot, runScript = runSnapshotScript }) {
+  return withSnapshot(undefined, (snapshot) =>
+    runScript(snapshot, 'engine/bin/skilly.js', ['deliver', snapshot.dir, snapshot.release], { cwd }),
+  );
 }

@@ -1,0 +1,10 @@
+{
+  "detect": { "dependencies": ["@hatchet-dev/*"] },
+  "includes": [],
+  "sources": [
+    {
+      "source": "https://github.com/hatchet-dev/hatchet/tree/main/cmd/hatchet-cli/cli/skill-assets",
+      "skills": ["hatchet-cli"]
+    }
+  ]
+}

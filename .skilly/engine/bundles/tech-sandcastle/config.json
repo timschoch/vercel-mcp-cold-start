@@ -1,0 +1,10 @@
+{
+  "detect": { "dependencies": ["@ai-hero/sandcastle"] },
+  "includes": [],
+  "sources": [
+    {
+      "source": "timschoch/skilly",
+      "skills": ["sandcastle"]
+    }
+  ]
+}

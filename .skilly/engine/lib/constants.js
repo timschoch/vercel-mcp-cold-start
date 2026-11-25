@@ -1,5 +1,5 @@
 // Pinned: `add` output is unparseable and exit codes lie — the lock file is the only truth.
-export const SKILLS_CLI_VERSION = '1.5.23';
+export const SKILLS_CLI_VERSION = '1.9.0';
 export const HUB_REPO = 'timschoch/skilly';
 // The accounts whose skilly App installs the Hub nightly syncs. Any account can
 // install the App; an install by anyone else is ignored.

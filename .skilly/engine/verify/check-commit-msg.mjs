@@ -7,7 +7,7 @@ import { execFileSync } from 'node:child_process';
 import { readFileSync } from 'node:fs';
 import { defaultBranch } from './default-branch.mjs';
 
-const TYPES = ['feat', 'fix', 'chore', 'docs', 'refactor', 'test', 'ci', 'build', 'perf', 'style', 'revert'];
+const TYPES = ['feat', 'fix', 'chore', 'docs', 'refactor', 'test', 'ci', 'build', 'perf', 'style', 'revert', 'research'];
 const HEADER = new RegExp(`^(${TYPES.join('|')})(\\([a-z0-9./-]+\\))?!?: \\S.{0,71}$`);
 const PASSTHROUGH = ['Merge ', 'Revert ', 'fixup!', 'squash!'];
 

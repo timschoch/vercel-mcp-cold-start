@@ -9,6 +9,12 @@ export function sourceRepo(source) {
   return url ? url[1] : source;
 }
 
+// The name a Bundle skill installs under: its `rename` entry, else its name
+// in the Source. The installed name is the lock key and the folder name.
+export function installedName(entry, skill) {
+  return entry.rename?.[skill] ?? skill;
+}
+
 // Resolve bundle names to the union of their sources, following `includes`
 // recursively. Cycles and unknown bundles are hard errors.
 // selfSource ("owner/repo") and ownSkills (see lib/self-source.js) opt into the
@@ -36,7 +42,8 @@ export function resolveBundles(names, bundlesDir, { selfSource = null, ownSkills
   };
   for (const name of names) visit(name);
 
-  const sources = new Map(); // "owner/repo" -> Set of skill names
+  const sources = new Map(); // "owner/repo" -> Set of installed skill names
+  const originalNames = new Map(); // installed name -> name in the Source, renamed skills only
   // GitHub owner/repo is case-insensitive, and the git remote can spell it
   // differently from the bundle config, so this one comparison folds case.
   const selfKey = selfSource ? selfSource.toLowerCase() : null;
@@ -45,10 +52,12 @@ export function resolveBundles(names, bundlesDir, { selfSource = null, ownSkills
       const isSelf = selfKey && sourceRepo(entry.source).toLowerCase() === selfKey;
       for (const skill of entry.skills ?? []) {
         if (isSelf && ownSkills.has(skill)) continue;
+        const name = installedName(entry, skill);
+        if (name !== skill) originalNames.set(name, skill);
         if (!sources.has(entry.source)) sources.set(entry.source, new Set());
-        sources.get(entry.source).add(skill);
+        sources.get(entry.source).add(name);
       }
     }
   }
-  return { bundles: [...configs.keys()], sources };
+  return { bundles: [...configs.keys()], sources, originalNames };
 }

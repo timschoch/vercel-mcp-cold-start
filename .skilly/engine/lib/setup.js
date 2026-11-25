@@ -13,9 +13,9 @@ import {
   unlinkSync,
 } from 'node:fs';
 import { join, resolve } from 'node:path';
-import { cloneRelease, latestRelease } from './add-remove.js';
 import { HUB_REPO } from './constants.js';
 import { ghCli, pushSyncBranch, reportSections } from './delivery.js';
+import { withReleaseSnapshot } from './release-snapshot.js';
 import { applySettings } from './repo-settings.js';
 import { tryRun } from './run.js';
 import { selfSource } from './self-source.js';
@@ -146,8 +146,7 @@ export function setup({
   repo = selfSource(cwd),
   skills = skillsCli,
   gh = ghCli(cwd),
-  latestRelease: newest = latestRelease,
-  fetchSnapshot = cloneRelease,
+  withSnapshot = withReleaseSnapshot,
   log = console.log,
 }) {
   const config = readSetupConfig(cwd);
@@ -161,10 +160,8 @@ export function setup({
   const invite = hubInvite(gh);
   if (invite) log(`this gh login cannot read ${HUB_REPO}. The Hub owner runs:\n  ${invite}`);
 
-  const snapshot = fetchSnapshot(config.hub ?? newest());
-  let delivery;
-  try {
-    delivery = pushSyncBranch({
+  const { report, pr } = withSnapshot(config.hub, (snapshot) =>
+    pushSyncBranch({
       cwd,
       snapshot,
       skills,
@@ -175,12 +172,9 @@ export function setup({
       prepare: (tree) => prepareTree(tree, config),
       // The Setup PR is often the first run of the repo's Actions.
       workflowsFirst: true,
-    });
-  } finally {
-    snapshot.cleanup();
-  }
-  const { report, pr } = delivery;
-  if (!pr) log(`nothing to set up: the default branch already runs Release ${snapshot.release}`);
+    }),
+  );
+  if (!pr) log(`nothing to set up: the default branch already runs Release ${report.release.after}`);
   else if (!pr.pushed) log(`Setup PR unchanged: ${pr.url}`);
   else log(`Setup PR ${pr.created ? 'opened' : 'updated'}: ${pr.url}`);
   if (removeUncommittedConfig(cwd))

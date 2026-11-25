@@ -1,5 +1,6 @@
 import { existsSync, readFileSync, readdirSync } from 'node:fs';
 import { join } from 'node:path';
+import { installedName } from './resolve.js';
 
 // Match one name against the hub's bundles, first match wins: a bundle beats
 // a skill of the same name. Returns null for
@@ -16,7 +17,8 @@ export function matchName(name, bundlesDir) {
     if (!existsSync(configPath)) continue;
     const config = JSON.parse(readFileSync(configPath, 'utf8'));
     for (const entry of config.sources ?? []) {
-      if ((entry.skills ?? []).includes(name)) return { type: 'skill', name, source: entry.source };
+      const originalName = (entry.skills ?? []).find((skill) => installedName(entry, skill) === name);
+      if (originalName) return { type: 'skill', name, source: entry.source, originalName };
     }
   }
   return null;

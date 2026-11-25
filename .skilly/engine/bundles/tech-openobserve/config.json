@@ -1,0 +1,15 @@
+{
+  "includes": [],
+  "sources": [
+    {
+      "source": "openobserve/claude-code-plugin",
+      "skills": ["setup", "sql-query", "dashboard-creation", "alert-creation"],
+      "rename": {
+        "setup": "openobserve-setup",
+        "sql-query": "openobserve-sql-query",
+        "dashboard-creation": "openobserve-dashboard-creation",
+        "alert-creation": "openobserve-alert-creation"
+      }
+    }
+  ]
+}

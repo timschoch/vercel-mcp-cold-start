@@ -120,18 +120,19 @@ export function writeEngine(cwd, engineDir) {
 // The skills the config asks for, by source. A Hub skill installs from the
 // Release tag, so the skill matches the Engine that runs next to it.
 function wantedSkills(config, bundlesDir, self, release) {
-  const { bundles, sources } = resolveBundles(config.bundles, bundlesDir, self);
+  const { bundles, sources, originalNames } = resolveBundles(config.bundles, bundlesDir, self);
   for (const name of config.skills ?? []) {
     const match = matchName(name, bundlesDir);
     if (match?.type !== 'skill') throw new Error(`no skill named "${name}" in Release ${release}`);
     if (!sources.has(match.source)) sources.set(match.source, new Set());
     sources.get(match.source).add(name);
+    if (match.originalName !== name) originalNames.set(name, match.originalName);
   }
   const pinned = new Map();
   for (const [source, skills] of sources) {
     pinned.set(sourceRepo(source) === HUB_REPO && release ? `${source}#${release}` : source, skills);
   }
-  return { bundles, sources: pinned };
+  return { bundles, sources: pinned, originalNames };
 }
 
 // repo: the Consumer's "owner/repo". Given, the report carries the repo
@@ -173,7 +174,7 @@ export function sync({
   for (const [source, names] of wanted.sources) {
     const missing = [...names].filter((name) => !(name in lock)).sort();
     if (!missing.length) continue;
-    const result = skills.add(cwd, source, missing);
+    const result = skills.add(cwd, source, missing, wanted.originalNames);
     if (result.missing.length) throw new Error(`skills add left these uninstalled: ${result.missing.join(', ')}`);
     added.push(...result.added);
   }
@@ -186,7 +187,7 @@ export function sync({
     for (const [source, names] of wanted.sources) {
       const installed = [...names].filter((name) => name in lock).sort();
       if (sourceRepo(source.split('#')[0]) !== HUB_REPO || !installed.length) continue;
-      const result = skills.add(cwd, source, installed);
+      const result = skills.add(cwd, source, installed, wanted.originalNames);
       if (result.missing.length) throw new Error(`skills add left these uninstalled: ${result.missing.join(', ')}`);
       for (const name of installed) updated.add(name);
     }

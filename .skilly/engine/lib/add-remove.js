@@ -1,9 +1,7 @@
-import { mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
-import { tmpdir } from 'node:os';
+import { readFileSync, writeFileSync } from 'node:fs';
 import { join } from 'node:path';
-import { HUB_REPO } from './constants.js';
 import { matchName } from './match.js';
-import { run } from './run.js';
+import { withReleaseSnapshot } from './release-snapshot.js';
 import * as skillsCli from './skills-cli.js';
 import { CONFIG_PATH, read, write } from './skilly-file.js';
 import { sync } from './sync.js';
@@ -11,17 +9,6 @@ import { sync } from './sync.js';
 // Add and Remove (ADR-0008 decision 16): edit .skilly/config.json, then run
 // the Sync at the pinned Release. No commit, no push, no PR: the person
 // reviews the files and commits them.
-
-export function latestRelease() {
-  return run('gh', ['release', 'view', '--repo', HUB_REPO, '--json', 'tagName', '--jq', '.tagName']);
-}
-
-// A Release snapshot: a shallow clone of one tag, outside the checkout.
-export function cloneRelease(release) {
-  const dir = mkdtempSync(join(tmpdir(), 'skilly-release-'));
-  run('gh', ['repo', 'clone', HUB_REPO, dir, '--', '--quiet', '--depth', '1', '--branch', release]);
-  return { dir, release, cleanup: () => rmSync(dir, { recursive: true, force: true }) };
-}
 
 const without = (list, name) => list.filter((entry) => entry !== name);
 
@@ -49,24 +36,23 @@ function edit(verb, names, config, snapshot) {
 export function runVerb(
   verb,
   names,
-  { cwd, skills = skillsCli, latestRelease: newest = latestRelease, fetchSnapshot = cloneRelease },
+  { cwd, skills = skillsCli, withSnapshot = withReleaseSnapshot },
 ) {
   if (!names.length) throw new Error(`usage: node .skilly/engine/bin/skilly.js ${verb} <bundle-or-skill...>`);
   const configPath = join(cwd, CONFIG_PATH);
   const config = read(cwd);
   const original = readFileSync(configPath, 'utf8');
-  const snapshot = fetchSnapshot(config.hub ?? newest());
-  try {
-    write(cwd, edit(verb, names, config, snapshot));
-    const report = sync({ cwd, snapshot, skills });
-    // The Sync sees the config after the edit, so it cannot list it itself.
-    const files = new Set(report.files);
-    if (readFileSync(configPath, 'utf8') !== original) files.add(CONFIG_PATH);
-    return { ...report, files: [...files].sort() };
-  } catch (error) {
-    writeFileSync(configPath, original);
-    throw error;
-  } finally {
-    snapshot.cleanup();
-  }
+  return withSnapshot(config.hub, (snapshot) => {
+    try {
+      write(cwd, edit(verb, names, config, snapshot));
+      const report = sync({ cwd, snapshot, skills });
+      // The Sync sees the config after the edit, so it cannot list it itself.
+      const files = new Set(report.files);
+      if (readFileSync(configPath, 'utf8') !== original) files.add(CONFIG_PATH);
+      return { ...report, files: [...files].sort() };
+    } catch (error) {
+      writeFileSync(configPath, original);
+      throw error;
+    }
+  });
 }

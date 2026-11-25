@@ -30,7 +30,7 @@ export function stderrForSkills(stderr, skills) {
       snippet = 'none';
       if (line === '') continue;
     }
-    const skipped = line.match(/^⚠ Skipped (.*)\/SKILL\.md — /);
+    const skipped = line.match(/^\[SKILLS_SKILL_SKIPPED\] ⚠ Skipped (.*)\/SKILL\.md — /);
     if (skipped && !wanted.has(basename(skipped[1]))) {
       if (line.endsWith(':')) snippet = 'open';
       continue;
@@ -56,8 +56,23 @@ function invoke(cwd, args, skills) {
   if (skills) process.stderr.write(stderrForSkills(result.stderr, skills));
 }
 
-export function add(cwd, source, skills) {
-  invoke(cwd, ['add', source, '-s', ...skills, '-y', '--agent', 'claude-code'], skills);
+// The `skills add` calls for the given skills: one call for all plain skills,
+// one per renamed skill, because --rename takes one skill. skills: installed
+// names. originalNames maps an installed name to its name in the Source.
+// Each call carries the args and the skills its stderr is filtered by.
+export function addCalls(source, skills, originalNames = new Map()) {
+  const flags = ['-y', '--agent', 'claude-code'];
+  const plain = skills.filter((name) => !originalNames.has(name));
+  const calls = plain.length ? [{ args: ['add', source, '-s', ...plain, ...flags], skills: plain }] : [];
+  for (const name of skills.filter((name) => originalNames.has(name))) {
+    const originalName = originalNames.get(name);
+    calls.push({ args: ['add', source, '-s', originalName, '--rename', name, ...flags], skills: [originalName] });
+  }
+  return calls;
+}
+
+export function add(cwd, source, skills, originalNames = new Map()) {
+  for (const call of addCalls(source, skills, originalNames)) invoke(cwd, call.args, call.skills);
   const lock = readLock(cwd);
   return {
     added: skills.filter((name) => name in lock),

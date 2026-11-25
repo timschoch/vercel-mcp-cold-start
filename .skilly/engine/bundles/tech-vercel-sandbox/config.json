@@ -1,0 +1,10 @@
+{
+  "detect": { "dependencies": ["@vercel/sandbox"] },
+  "includes": [],
+  "sources": [
+    {
+      "source": "vercel/sandbox",
+      "skills": ["sandbox"]
+    }
+  ]
+}
