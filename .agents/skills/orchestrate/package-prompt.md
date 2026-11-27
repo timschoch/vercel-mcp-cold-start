@@ -14,7 +14,7 @@ own worktree, TDD, /code-review, open your own PR with "Closes #$N".
   own DB + port, idempotent.
 - Commit messages with a body: write to a file INSIDE the worktree, `git commit -F`.
 - gh comment bodies via `--body-file`, never heredocs.
-- Vercel preview red is usually infra, not your code — CI verify is your gate.
+- Vercel preview red is usually infra, not your code — CI runs the repo's checks and decides.
 
 ## Ledger
 Your sub-issue is your ledger. Post a condensed 🤖 comment whenever anything
@@ -37,10 +37,10 @@ the archive's equivalent hunk before requesting review — it has already fixed
 bugs you will otherwise reintroduce. Re-verify everything you take.
 
 ## Finish checklist — you are not done until the PR is open
-1. Before opening the PR: `git fetch` + rebase onto `origin/$(node .agents/skills/verify/scripts/default-branch.mjs)` + re-run verify.
+1. Before opening the PR: `git fetch` + rebase onto `origin/$(gh repo view --json defaultBranchRef -q .defaultBranchRef.name)`.
    If the PR later shows CONFLICTING, rebase again unprompted.
 2. Commit → push → confirm the branch exists on origin.
-3. Open the PR: "Closes #$N", verify-green.
+3. Open the PR: "Closes #$N". CI runs the repo's checks and decides.
 4. Ledger comment on #$N: 🤖 progress — PR opened, link.
 5. Report PR number + one-line status to the orchestrator.
 On any error: report the exact error to the orchestrator. Never go idle

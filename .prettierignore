@@ -12,4 +12,3 @@ skills-lock.json
 package-lock.json
 pnpm-lock.yaml
 yarn.lock
-.github/workflows/ci.yml
