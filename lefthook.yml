@@ -1,6 +1,3 @@
-extends:
-  - .skilly/lefthook.json
-
 pre-commit:
   commands:
     husky:

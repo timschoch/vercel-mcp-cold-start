@@ -2,6 +2,8 @@
 
 Run the `unslop` skill on every output before it ships — prose, docs, commit messages, PR bodies, issue text. No exceptions for "small" outputs; slop compounds.
 
+Before you write a `.md` file through any tool, read the writing rules for its style: [all](writing-rules-all.md) plus [plain](writing-rules-plain.md) or [dense](writing-rules-dense.md). A native write loads them by path; a write through an MCP tool does not.
+
 When a correction repeats, encode it as one bad and one good example next to the rule, not as more prose. Agents learn the pair better than the sentence. Where the pair goes:
 
 - Rule in `CLAUDE.md` or a repo-owned rule file: under the rule, in place.

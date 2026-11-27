@@ -1,9 +1,0 @@
-{
-  "includes": [],
-  "sources": [
-    {
-      "source": "timschoch/skilly",
-      "skills": ["test-skill-a", "test-skill-b"]
-    }
-  ]
-}
